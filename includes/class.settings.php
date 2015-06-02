@@ -1,14 +1,13 @@
 <?php
 
-class bp_social_connect_settings {
+class bp_social_connect_settings extends bpc_config{
 
-	var $version = '1.0';
 	var $settings;
 
 	public function __construct(){
 		add_options_page(__('BP Social Connect settings','bp-social-connect'),__('BP Social Connect','bp-social-connect'),'manage_options','bp-social-connect',array($this,'settings'));
 		add_action('admin_enqueue_scripts',array($this,'enqueue_admin_scripts'));
-		$this->settings=get_option('bp_social_connect_settings');
+		$this->settings=$this->get(); 
 	}
 
 	function enqueue_admin_scripts($hook){
@@ -56,6 +55,27 @@ class bp_social_connect_settings {
 
 	function facebook(){
 		echo '<h3>'.__('Facebook Social Connect Settings','bp-social-connect').'</h3>';
+		$settings = array(
+				array(
+					'label' => __('Enable Facebook Login','vibe-customtypes'),
+					'name' =>'facebook',
+					'type' => 'checkbox',
+					'desc' => __(' Enable facebook login','vibe-customtypes')
+				),
+				array(
+					'label' => __('APP ID','vibe-customtypes'),
+					'name' => 'facebook_app_id',
+					'type' => 'text',
+					'desc' => __('Set your Facebook APP ID','vibe-customtypes')
+				),
+				array(
+					'label' => __('APP Secret','vibe-customtypes'),
+					'name' => 'facebook_app_secret',
+					'type' => 'text',
+					'desc' => __('Enter facebook App secret','vibe-customtypes')
+				),
+			);
+		$this->generate_form('facebook',$settings);
 	}
 	function twitter(){
 		echo '<h3>'.__('Twitter Social Connect Settings','bp-social-connect').'</h3>';
@@ -69,8 +89,8 @@ class bp_social_connect_settings {
 
 	function generate_form($tab,$settings=array()){
 		echo '<form method="post">';
-		wp_nonce_field('chat_settings','_wpnonce');   
-		echo '<ul class="chat-settings">';
+		wp_nonce_field('save_settings','_wpnonce');   
+		echo '<ul class="save-settings">';
 
 		foreach($settings as $setting ){
 			echo '<li>';
@@ -117,15 +137,19 @@ class bp_social_connect_settings {
 
 
 	function save(){
-		$none = $_POST['chat_settings'];
-		if ( !isset($_POST['save']) || !isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'],'chat_settings') ){
+		$none = $_POST['save_settings'];
+		if ( !isset($_POST['save']) || !isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'],'save_settings') ){
 		    _e('Security check Failed. Contact Administrator.','bp-social-connect');
 		    die();
 		}
+		unset($_POST['_wpnonce']);
+		unset($_POST['_wp_http_referer']);
+		unset($_POST['save']);
 		foreach($_POST as $key => $value){
 			$this->settings[$key]=$value;
 		}
-		update_option('chat_settings',$this->settings);
+
+		$this->put($this->settings);
 	}
 }
 

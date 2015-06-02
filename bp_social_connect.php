@@ -11,6 +11,10 @@ Author URI: http://www.VibeThemes.com/
 
 
 /*====== BEGIN VSLIDER======*/
+include_once('includes/class.config.php');
+
+include_once('includes/social/facebook/class.facebook.php');
+include_once('includes/social/twitter/class.twitter.php');
 
 include_once('includes/class.init.php');
 include_once('includes/class.settings.php');
