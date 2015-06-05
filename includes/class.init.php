@@ -58,19 +58,6 @@ class init_bp_social_connect extends bpc_config{
 			.loading{
 				opacity: :0.2;
 			}
-			.bp_social_connect a{
-			  opacity: 0;
-			  transform-origin: 0% 0%;
-			  animation-name: spinvert;
-			  animation-duration: .5s;
-			  animation-fill-mode: forwards;
-			  animation-timing-function: ease;
-			  animation-iteration-count: 1;
-			}
-			@keyframes spinvert{
-				0%{opacity:.5;transform:translateY(50px) rotateY(0deg) rotateX(0deg) scale(0.8, 0.8)}
-				100%{opacity:1;transform:translateY(0px) rotateY(180deg) rotateX(0deg) scale(1, 1)}
-			}
 		</style>
 	<?php
 	}
