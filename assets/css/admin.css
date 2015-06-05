@@ -1,0 +1,10 @@
+.bp_fields li.hide{
+	display:none;
+}
+
+.form-table td span {
+  font-size: 12px;
+  padding-left: 10px;
+  color: #888;
+}
+
