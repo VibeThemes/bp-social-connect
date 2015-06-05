@@ -30,7 +30,6 @@ class bp_social_connect_settings extends bpc_config{
 	    		'facebook' => __('Facebook','bp-social-connect'), 
 	    		'twitter' => __('Twitter','bp-social-connect'), 
 	    		'google' => __('Google','bp-social-connect'), 
-	    		'linkedin' => __('Linkedin','bp-social-connect'), 
 	    		);
 	    echo '<div id="icon-themes" class="icon32"><br></div>';
 	    echo '<h2 class="nav-tab-wrapper">';
@@ -66,6 +65,41 @@ class bp_social_connect_settings extends bpc_config{
 					'type' => 'text',
 					'std'=>wp_generate_password( 16, false ),
 					'desc' => __('Set a random security key value','vibe-customtypes')
+				),
+				array(
+					'label' => __('Social Button Styling','vibe-customtypes'),
+					'name' =>'button_css',
+					'type' => 'textarea',
+					'std'=> '
+					.bp_social_connect{
+						text-align: center;
+					}
+					.bp_social_connect a {
+					  background: #3b5998;
+					  color: #FFF;
+					  font-weight: 600;
+					  padding: 15px 20px;
+					  display: inline-block;
+					  text-decoration: none;
+					  min-width: 220px;
+					  margin: 5px 0;
+					  border-radius: 2px;
+					  letter-spacing: 1px;
+					  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+					}
+					.bp_social_connect a:hover{
+						box-shadow: none;	
+					}
+					.bp_social_connect a:focus{
+						box-shadow: inset 0 4px 0 rgba(0,0,0,0.1)
+					}
+					#bp_social_connect_twitter{
+						background:#4099FF;
+					}
+					#bp_social_connect_google{
+						background:#DD4B39;
+					}',
+					'desc' => __('Change default style of buttons','vibe-customtypes')
 				),
 			);
 
@@ -172,9 +206,6 @@ class bp_social_connect_settings extends bpc_config{
 		$this->generate_form('google',$settings);
 		
 	}
-	function linkedin(){
-		echo '<h3>'.__('LinkedIn Social Connect Settings','bp-social-connect').'</h3>';
-	}
 
 	function generate_form($tab,$settings=array()){
 		echo '<form method="post">
@@ -186,9 +217,9 @@ class bp_social_connect_settings extends bpc_config{
 			echo '<tr valign="top">';
 			global $wpdb,$bp;
 			switch($setting['type']){
-				case 'textarea':
+				case 'textarea': 
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><textarea name="'.$setting['name'].'">'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'</textarea>';
+					echo '<td class="forminp"><textarea name="'.$setting['name'].'">'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'</textarea>';
 					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 				case 'select':
