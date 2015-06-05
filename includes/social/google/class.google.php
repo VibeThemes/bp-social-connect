@@ -120,6 +120,7 @@ class bp_social_connect_google extends bpc_config{
 				foreach($this->fields as $key => $value){
 					$this->fields[$key] = $user_email[$key];
 				}
+
 				//if user data get successfully
 				if (isset($user_info['id'])){
 					
@@ -135,8 +136,7 @@ class bp_social_connect_google extends bpc_config{
 					$user_id='';
 					if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
 						$user_id = $users[0]->ID;
-						update_user_meta($user_id,$this->google_meta_key,$user_info['id']);
-						$this->force_login($this->fields['email'],false);
+						$this->force_login($users[0]->user_email,false);
 						wp_redirect(site_url());
 						die();
 					} 
@@ -145,18 +145,20 @@ class bp_social_connect_google extends bpc_config{
 						$email = $this->fields['email'];
 						if( email_exists( $email )) { // user is a member 
 							  $user = get_user_by('email',$email );
-							  $user_id = $user->ID;
+							  if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
+							  $user_id = $user[0]->ID;
 							  update_user_meta($user_id,$this->google_meta_key,$user_info['id']);
 							  $this->force_login($email ,false);
 							  wp_redirect(site_url());
 							  die();
+							}
 					    }else{ // Register this new user
 						    $random_password = wp_generate_password( 10, false );
 						    $user_id = wp_create_user( $email , $random_password, $email );
 						    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
 						    wp_update_user(
 						    	array(
-						    		'ID'=>$user_id,
+						    		'ID' =>$user_id,
 						    		'user_url'=> $this->fields['link'],
 						    		'user_nicename'=>$this->fields['given_name'],
 						    		'display_name'=>$this->fields['name'],
@@ -176,7 +178,7 @@ class bp_social_connect_google extends bpc_config{
 						  	$this->grab_avatar($full,'full',$user_id);
 						  	//Redirect JSON
 						  	$this->force_login($this->fields['email'],false);
-						    wp_redirect(site_url());
+						    wp_redirect(home_url());
 						    die();
 					    }
 					}

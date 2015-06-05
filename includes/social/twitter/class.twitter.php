@@ -24,7 +24,7 @@ class bp_social_connect_twitter extends bpc_config{
 		add_action('init',array($this,'initialise'));
 		add_action('login_init',array($this,'authorize'));
 		add_action('template_redirect',array($this,'authorize'));
-		add_filter('bp_social_connect_google_fields',array($this,'map_fields'));
+		add_filter('bp_social_connect_twitter_fields',array($this,'map_fields'));
 	}
 
 	function map_fields($settings){
@@ -60,7 +60,7 @@ class bp_social_connect_twitter extends bpc_config{
 
 	function get_twitter_auth_url() {
 			
-		//if (!get_option('twitter_oauth_url')){
+		//if (!get_transient('twitter_oauth_url')){
 			$this->initialise();
 			$request_token = $this->twitter->getRequestToken($this->settings['twitter_callback']);
 			
@@ -72,10 +72,10 @@ class bp_social_connect_twitter extends bpc_config{
 			}else{
 				$this->twitter_url = '';
 			}
-			update_option('twitter_oauth_url', $this->twitter_url);
+			set_transient('twitter_oauth_url',$this->twitter_url,12*HOUR_IN_SECONDS);
 			return $this->twitter_url;
 		//} else {
-		//	return get_option('twitter_oauth_url');
+			return get_transient('twitter_oauth_url');
 		//}
 	}
 
@@ -84,15 +84,16 @@ class bp_social_connect_twitter extends bpc_config{
 		if (isset($this->settings['twitter'])) { 
 			
 			if ( isset( $_REQUEST['oauth_verifier'] ) && isset( $_REQUEST['oauth_token'] ) ) { 
-				
+
 				$this->initialise();
 				$oauth_token = $_SESSION['twitter_oauth_token'];
 				$oauth_token_secret = $_SESSION['twitter_oauth_token_secret'];
+
 				if(!isset($oauth_token)){
 					$oauth_token = $_REQUEST['oauth_token'];
 				}
 				if( isset( $oauth_token ) && $oauth_token == $_REQUEST['oauth_token'] ){
-				
+					
 					$this->twitter = new TwitterOAuth( $this->settings['twitter_consumer_key'] ,$this->settings['twitter_consumer_secret'], $oauth_token, $oauth_token_secret );
 					$twitter_access_token = $this->twitter->getAccessToken($_REQUEST['oauth_verifier']);
 					
@@ -117,13 +118,13 @@ class bp_social_connect_twitter extends bpc_config{
 							'meta_compare' => '='
 						));
 						if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
-							$this->force_login($users[0]->user_email,false);
-							update_user_meta($users[0]->ID,$this->twitter_meta_key,$this->fields['id']);
-							die();
+							$this->force_login_user($users[0]->user_login,false);
+							wp_redirect(home_url());
+							exit;
 						} else {
 							$user_login = $this->generate_username($twitter_user['screen_name']);
 
-							$random_password = wp_generate_password( 10, false );
+							$random_password = $user_login.'@123';
 						    $user_id = wp_create_user($user_login, $random_password);
 						    //Add twitter user ID to User meta field
 						    update_user_meta($user_id,$this->twitter_meta_key,$twitter_user['id']);
@@ -150,7 +151,17 @@ class bp_social_connect_twitter extends bpc_config{
 					    	);
 						  	//Redirect JSON
 						  	$this->force_login_user($user_login ,false);
-							wp_redirect(site_url(),200);
+						  	if(function_exists('bp_core_get_user_domain')){
+						  		if(defined(BP_SETTINGS_SLUG)){
+						  		$url = bp_core_get_user_domain($user_id).'/'.BP_SETTINGS_SLUG;
+							  	}else{
+							  		$url = bp_core_get_user_domain($user_id).'/settings';
+							  	}
+						  	}else{
+						  		$url = home_url();
+						  	}
+						  	
+							wp_redirect($url);
 							exit;
 							
 						}
