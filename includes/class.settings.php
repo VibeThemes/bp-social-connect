@@ -15,6 +15,7 @@ class bp_social_connect_settings extends bpc_config{
         	return;
     	}
     	wp_enqueue_style( 'bp_social_connect_admin_style', plugin_dir_url( __FILE__ ) . '../assets/css/admin.css' );
+    	wp_enqueue_script( 'bp_social_connect_admin_style', plugin_dir_url( __FILE__ ) . '../assets/js/admin.js',array('jquery'),'1.0',true);
 	}
 
 	function settings(){
@@ -48,6 +49,24 @@ class bp_social_connect_settings extends bpc_config{
 		echo '<h3>'.__('BP Social Connect Settings','bp-social-connect').'</h3>';
 	
 		$settings=array(
+				array(
+					'label' => __('Redirect Settings','vibe-customtypes'),
+					'name' =>'redirect_link',
+					'type' => 'select',
+					'options'=> apply_filters('bp_social_connect_redirect_settings',array(
+						'' => __('Same Page','vibe-customtypes'),
+						'home' => __('Home','vibe-customtypes'),
+						'profile' => __('BuddyPress Profile','vibe-customtypes'),
+						)),
+					'desc' => __('Set Login redirect settings','vibe-customtypes')
+				),
+				array(
+					'label' => __('Security Key','vibe-customtypes'),
+					'name' =>'security',
+					'type' => 'text',
+					'std'=>wp_generate_password( 16, false ),
+					'desc' => __('Set a random security key value','vibe-customtypes')
+				),
 			);
 
 		$this->generate_form('general',$settings);
@@ -59,7 +78,11 @@ class bp_social_connect_settings extends bpc_config{
 				array(
 					'label' => __('Enable Facebook Login','vibe-customtypes'),
 					'name' =>'facebook',
-					'type' => 'checkbox',
+					'type' => 'select',
+					'options'=>array(
+						'0' => __('No','bp-social-connect'),
+						'1' => __('Yes','bp-social-connect'),
+					),
 					'desc' => __(' Enable facebook login','vibe-customtypes')
 				),
 				array(
@@ -75,63 +98,168 @@ class bp_social_connect_settings extends bpc_config{
 					'desc' => __('Enter facebook App secret','vibe-customtypes')
 				),
 			);
+		$settings = apply_filters('bp_social_connect_facebook_fields',$settings);
 		$this->generate_form('facebook',$settings);
 	}
 	function twitter(){
 		echo '<h3>'.__('Twitter Social Connect Settings','bp-social-connect').'</h3>';
+		$settings = array(
+				array(
+					'label' => __('Enable Twitter Login','vibe-customtypes'),
+					'name' =>'twitter',
+					'type' => 'select',
+					'options'=>array(
+						'0' => __('No','bp-social-connect'),
+						'1' => __('Yes','bp-social-connect'),
+					),
+					'desc' => sprintf(__('Open this link %s to create an app and enter your consumer keys to enable twitter connect.','vibe-customtypes'),'<a href="https://dev.twitter.com/apps/">https://dev.twitter.com/apps/</a>')
+				),
+				array(
+					'label' => __('Consumer Key','vibe-customtypes'),
+					'name' => 'twitter_consumer_key',
+					'type' => 'text',
+					'desc' => __('Set your Twitter Consumer key','vibe-customtypes')
+				),
+				array(
+					'label' => __('Consumer Secret','vibe-customtypes'),
+					'name' => 'twitter_consumer_secret',
+					'type' => 'text',
+					'desc' => __('Enter twitter consumer key secret','vibe-customtypes')
+				),
+				array(
+					'label' => __('Callback','vibe-customtypes'),
+					'name' => 'twitter_callback',
+					'type' => 'text',
+					'desc' => __('Enter twitter callback','vibe-customtypes')
+				),
+			);
+		$settings = apply_filters('bp_social_connect_twitter_fields',$settings);
+		$this->generate_form('twitter',$settings);
 	}
 	function google(){
 		echo '<h3>'.__('Google Social Connect Settings','bp-social-connect').'</h3>';
+		$settings = array(
+				array(
+					'label' => __('Enable Google Login','vibe-customtypes'),
+					'name' =>'google',
+					'type' => 'select',
+					'options'=>array(
+						'0' => __('No','bp-social-connect'),
+						'1' => __('Yes','bp-social-connect'),
+					),
+					'desc' => ''
+				),
+				array(
+					'label' => __('Client ID','vibe-customtypes'),
+					'name' => 'google_client_id',
+					'type' => 'text',
+					'desc' => __('Set your Google client id','vibe-customtypes')
+				),
+				array(
+					'label' => __('Client Secret','vibe-customtypes'),
+					'name' => 'google_client_secret',
+					'type' => 'text',
+					'desc' => __('Enter Google client secret','vibe-customtypes')
+				),
+				array(
+					'label' => __('Client Uri','vibe-customtypes'),
+					'name' => 'google_redirect_uri',
+					'type' => 'text',
+					'desc' => __('Enter redirect uri','vibe-customtypes')
+				),
+			);
+		$settings = apply_filters('bp_social_connect_google_fields',$settings);
+		$this->generate_form('google',$settings);
+		
 	}
 	function linkedin(){
 		echo '<h3>'.__('LinkedIn Social Connect Settings','bp-social-connect').'</h3>';
 	}
 
 	function generate_form($tab,$settings=array()){
-		echo '<form method="post">';
+		echo '<form method="post">
+				<table class="form-table">';
 		wp_nonce_field('save_settings','_wpnonce');   
 		echo '<ul class="save-settings">';
 
 		foreach($settings as $setting ){
-			echo '<li>';
+			echo '<tr valign="top">';
+			global $wpdb,$bp;
 			switch($setting['type']){
 				case 'textarea':
-					echo '<label>'.$setting['label'].'</label>';
-					echo '<textarea name="'.$setting['name'].'">'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'</textarea>';
-					echo '<span>'.$setting['desc'].'</span>';
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><textarea name="'.$setting['name'].'">'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'</textarea>';
+					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 				case 'select':
-					echo '<label>'.$setting['label'].'</label>';
-					echo '<select name="'.$setting['name'].'" class="chzn-select">';
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><select name="'.$setting['name'].'" class="chzn-select">';
 					foreach($setting['options'] as $key=>$option){
 						echo '<option value="'.$key.'" '.(isset($this->settings[$setting['name']])?selected($key,$this->settings[$setting['name']]):'').'>'.$option.'</option>';
 					}
 					echo '</select>';
-					echo '<span>'.$setting['desc'].'</span>';
+					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 				case 'checkbox':
-					echo '<label>'.$setting['label'].'</label>';
-					echo '<input type="checkbox" name="'.$setting['name'].'" '.(isset($this->settings[$setting['name']])?'CHECKED':'').' />';
-					echo '<span>'.$setting['desc'].'</span>';
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><input type="checkbox" name="'.$setting['name'].'" '.(isset($this->settings[$setting['name']])?'CHECKED':'').' />';
+					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 				case 'number':
-					echo '<label>'.$setting['label'].'</label>';
-					echo '<input type="number" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'" />';
-					echo '<span>'.$setting['desc'].'</span>';
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><input type="number" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'" />';
+					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 				case 'hidden':
 					echo '<input type="hidden" name="'.$setting['name'].'" value="1"/>';
 				break;
+				case 'bp_fields':
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><a class="add_new_map button">'.__('Add BuddyPress profile field map','bp-social-connect').'</a>';
+
+					$table = $wpdb->prefix.'bp_xprofile_fields';
+					$bp_fields = $wpdb->get_results("SELECT DISTINCT name FROM {$table}");
+
+					echo '<ul class="bp_fields">';
+					if(is_array($this->settings[$setting['name']]['field']) && count($this->settings[$setting['name']]['field'])){
+						foreach($this->settings[$setting['name']]['field'] as $key => $field){
+							echo '<li><label><select name="'.$setting['name'].'[field][]">';
+							foreach($setting['fields'] as $k=>$v){
+								echo '<option value="'.$k.'" '.(($field == $k)?'selected=selected':'').'>'.$k.'</option>';
+							}
+							echo '</select></label><select name="'.$setting['name'].'[bpfield][]">';
+							foreach($bp_fields as $f){
+								echo '<option value="'.$f->name.'" '.(($this->settings[$setting['name']]['bpfield'][$key] == $f->name)?'selected=selected':'').'>'.$f->name.'</option>';
+							}
+							echo '</select><span class="dashicons dashicons-no remove_field_map"></span></li>';
+						}
+					}
+					echo '<li class="hide">';
+					echo '<label><select rel-name="'.$setting['name'].'[field][]">';
+					foreach($setting['fields'] as $k=>$v){
+						echo '<option value="'.$k.'">'.$k.'</option>';
+					}
+					echo '</select></label>';
+					echo '<select rel-name="'.$setting['name'].'[bpfield][]">';
+					
+					foreach($bp_fields as $f){
+						echo '<option value="'.$f->name.'">'.$f->name.'</option>';
+					}
+					echo '</select>';
+					echo '<span class="dashicons dashicons-no remove_field_map"></span></li>';
+					echo '</ul></td>';
+				break;
 				default:
-					echo '<label>'.$setting['label'].'</label>';
-					echo '<input type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:'').'" />';
-					echo '<span>'.$setting['desc'].'</span>';
+					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
+					echo '<td class="forminp"><input type="text" name="'.$setting['name'].'" value="'.(isset($this->settings[$setting['name']])?$this->settings[$setting['name']]:(isset($setting['std'])?$setting['std']:'')).'" />';
+					echo '<span>'.$setting['desc'].'</span></td>';
 				break;
 			}
 			
-			echo '</li>';
+			echo '</tr>';
 		}
-		echo '</ul>';
+		echo '</tbody>
+		</table>';
 		echo '<input type="submit" name="save" value="'.__('Save Settings','bp-social-connect').'" class="button button-primary" /></form>';
 	}
 
@@ -145,6 +273,7 @@ class bp_social_connect_settings extends bpc_config{
 		unset($_POST['_wpnonce']);
 		unset($_POST['_wp_http_referer']);
 		unset($_POST['save']);
+
 		foreach($_POST as $key => $value){
 			$this->settings[$key]=$value;
 		}
