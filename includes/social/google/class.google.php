@@ -154,7 +154,14 @@ class bp_social_connect_google extends bpc_config{
 						    $random_password = wp_generate_password( 10, false );
 						    $user_id = wp_create_user( $email , $random_password, $email );
 						    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
-
+						    wp_update_user(
+						    	array(
+						    		'ID'=>$user_id,
+						    		'user_url'=> $this->fields['link'],
+						    		'user_nicename'=>$this->fields['given_name'],
+						    		'display_name'=>$this->fields['name'],
+						    		)
+						    	);
 							if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
 						   	    if(count($this->settings['google_map_fields']['field'])){ 
 						   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){

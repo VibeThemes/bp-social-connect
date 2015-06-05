@@ -180,6 +180,15 @@ class bp_social_connect_facebook extends bpc_config{
 			    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
 			  	$this->grab_avatar($thumb,'thumb',$user_id);
 			  	$this->grab_avatar($full,'full',$user_id);
+
+			  	wp_update_user(
+					    	array(
+					    		'ID'=>$user_id,
+					    		'user_url'=> $this->fields['link'],
+					    		'user_nicename'=>$this->fields['first_name'],
+					    		'display_name'=>$this->fields['name'],
+					    		)
+					    	);
 			  	//Redirect JSON
 			  	$this->force_login($email,false);
 			  	$return=json_encode($return);
