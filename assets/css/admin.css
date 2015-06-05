@@ -8,3 +8,7 @@
   color: #888;
 }
 
+.form-table textarea{
+	max-width: 640px;
+    height: 200px;
+}
