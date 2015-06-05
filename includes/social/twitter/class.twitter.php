@@ -24,8 +24,20 @@ class bp_social_connect_twitter extends bpc_config{
 		add_action('init',array($this,'initialise'));
 		add_action('login_init',array($this,'authorize'));
 		add_action('template_redirect',array($this,'authorize'));
+		add_filter('bp_social_connect_google_fields',array($this,'map_fields'));
 	}
 
+	function map_fields($settings){
+		$settings[]= array(
+					'label' => __('Map Fields','vibe-customtypes'),
+					'name' => 'twitter_map_fields',
+					'fields' => $this->fields,
+					'type' => 'bp_fields',
+					'desc' => __('Map Twitter fields with BuddyPress','vibe-customtypes')
+				);
+
+		return $settings;
+	}
 	function initialise(){
 		if($this->settings['twitter']){
 			if (!session_id()){
@@ -51,7 +63,7 @@ class bp_social_connect_twitter extends bpc_config{
 		//if (!get_option('twitter_oauth_url')){
 			$this->initialise();
 			$request_token = $this->twitter->getRequestToken($this->settings['twitter_callback']);
-			print_r($request_token);
+			
 			if(200 == $this->twitter->http_code){
 				$_SESSION['twitter_oauth_token']=$request_token['oauth_token'];
 				$_SESSION['twitter_oauth_token_secret']=$request_token['oauth_token'];
@@ -106,33 +118,41 @@ class bp_social_connect_twitter extends bpc_config{
 						));
 						if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
 							$this->force_login($users[0]->user_email,false);
+							update_user_meta($users[0]->ID,$this->twitter_meta_key,$this->fields['id']);
 							die();
 						} else {
-							
-							/*
+							$user_login = $this->generate_username($twitter_user['screen_name']);
+
 							$random_password = wp_generate_password( 10, false );
-						    $user_id = wp_create_user( $twitter_user['email'] , $random_password, $twitter_user['email'] );
+						    $user_id = wp_create_user($user_login, $random_password);
 						    //Add twitter user ID to User meta field
 						    update_user_meta($user_id,$this->twitter_meta_key,$twitter_user['id']);
 
 							if(isset($this->settings['twitter_map_fields']) && is_array($this->settings['twitter_map_fields'])){
 						   	    if(count($this->settings['twitter_map_fields']['field'])){
-						   	  	   foreach($this->settings['twitter_map_fields']['field'] as $fb_key => $fb_field){
-						   	  	 		xprofile_set_field_data($this->settings['twitter_map_fields']['bpfield'][$fb_key],$user_id,$$fb_field);
+						   	  	   foreach($this->settings['twitter_map_fields']['field'] as $tw_key => $tw_field){
+						   	  	 		xprofile_set_field_data($this->settings['twitter_map_fields']['bpfield'][$tw_key],$user_id,$this->fields[$tw_field]);
 						   	  	   }
 						   	    }
 						    }
 							// Grab Image and set as 
-						    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
-						    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
+						    $thumb = str_replace('_normal', '_bigger',$twitter_user['profile_image_url']);
+						    $full = str_replace('_normal', '',$twitter_user['profile_image_url']);
 						  	$this->grab_avatar($thumb,'thumb',$user_id);
 						  	$this->grab_avatar($full,'full',$user_id);
+						  	wp_update_user(
+					    	array(
+					    		'ID'=>$user_id,
+					    		'user_url'=> $this->fields['url'],
+					    		'user_nicename'=>$this->fields['screen_name'],
+					    		'display_name'=>$this->fields['name'],
+					    		)
+					    	);
 						  	//Redirect JSON
-						  	$this->force_login($email,false);
-							update_user_meta($user_id,$this->twitter_meta_key,$twitter_user['id']);
+						  	$this->force_login_user($user_login ,false);
 							wp_redirect(site_url(),200);
 							exit;
-							*/
+							
 						}
 					}
 				}
