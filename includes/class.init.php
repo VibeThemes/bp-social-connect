@@ -27,7 +27,7 @@ class init_bp_social_connect extends bpc_config{
 		global $current_user;
 		get_currentuserinfo();
 		if (empty($current_user->user_email)) {
-		    echo '<div class="message error"><p style="text-transform: none;">'.sprintf(__('Please update your email id, your password is %s','bp-social-connect'),$current_user->user_login.'@123').'</p></div>';
+		    echo '<div class="message error"><p style="text-transform: none;">'.sprintf(__('Please update your email id in Profile - Settings , your password is %s','bp-social-connect'),strtolower($current_user->user_login).'@123').'</p></div>';
 		}
 	}
 	function ajaxurl() {

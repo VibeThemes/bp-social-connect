@@ -99,5 +99,6 @@ abstract class bpc_config{
 			do_action( 'wp_login', $user->user_login );
 		}
 		ob_end_clean();
+		return;
 	}
 }

@@ -59,8 +59,8 @@ class bp_social_connect_twitter extends bpc_config{
 	}
 
 	function get_twitter_auth_url() {
-			
-		//if (!get_transient('twitter_oauth_url')){
+		//if (!$_SESSION['twitter_oauth_url']){
+			session_destroy();
 			$this->initialise();
 			$request_token = $this->twitter->getRequestToken($this->settings['twitter_callback']);
 			
@@ -69,13 +69,13 @@ class bp_social_connect_twitter extends bpc_config{
 				$_SESSION['twitter_oauth_token_secret']=$request_token['oauth_token'];
 				$token = $request_token['oauth_token'];
 				$this->twitter_url = $this->twitter->getAuthorizeURL( $token );
+				$_SESSION['twitter_oauth_url'] = $this->twitter_url;
 			}else{
 				$this->twitter_url = '';
 			}
-			set_transient('twitter_oauth_url',$this->twitter_url,12*HOUR_IN_SECONDS);
 			return $this->twitter_url;
 		//} else {
-			return get_transient('twitter_oauth_url');
+		//	return $_SESSION['twitter_oauth_url'];
 		//}
 	}
 
@@ -88,13 +88,11 @@ class bp_social_connect_twitter extends bpc_config{
 				$this->initialise();
 				$oauth_token = $_SESSION['twitter_oauth_token'];
 				$oauth_token_secret = $_SESSION['twitter_oauth_token_secret'];
+				echo $oauth_token .' == '. $_REQUEST['oauth_token'];
 
-				if(!isset($oauth_token)){
-					$oauth_token = $_REQUEST['oauth_token'];
-				}
-				if( isset( $oauth_token ) && $oauth_token == $_REQUEST['oauth_token'] ){
-					
+				if( isset( $oauth_token ) && $oauth_token == $_REQUEST['oauth_token'] ){ 
 					$this->twitter = new TwitterOAuth( $this->settings['twitter_consumer_key'] ,$this->settings['twitter_consumer_secret'], $oauth_token, $oauth_token_secret );
+
 					$twitter_access_token = $this->twitter->getAccessToken($_REQUEST['oauth_verifier']);
 					
 					$_SESSION['twitter_oauth_token']=$twitter_access_token['oauth_token'];
@@ -102,7 +100,7 @@ class bp_social_connect_twitter extends bpc_config{
 					
 					//Data Capture from Twitter 
 					$twitter_user = (array)$this->twitter->get('account/verify_credentials');
-					
+
 					//if user data get successfully
 					if (isset($twitter_user['id'])){
 
@@ -117,14 +115,16 @@ class bp_social_connect_twitter extends bpc_config{
 							'meta_value'   => $twitter_user['id'],
 							'meta_compare' => '='
 						));
+						
+
 						if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
+							$_SESSION['user_login'] = $users[0]->user_login;
 							$this->force_login_user($users[0]->user_login,false);
-							wp_redirect(home_url());
+							wp_safe_redirect(home_url());
 							exit;
 						} else {
 							$user_login = $this->generate_username($twitter_user['screen_name']);
-
-							$random_password = $user_login.'@123';
+							$random_password = strtolower($user_login).'@123';
 						    $user_id = wp_create_user($user_login, $random_password);
 						    //Add twitter user ID to User meta field
 						    update_user_meta($user_id,$this->twitter_meta_key,$twitter_user['id']);
@@ -151,17 +151,7 @@ class bp_social_connect_twitter extends bpc_config{
 					    	);
 						  	//Redirect JSON
 						  	$this->force_login_user($user_login ,false);
-						  	if(function_exists('bp_core_get_user_domain')){
-						  		if(defined(BP_SETTINGS_SLUG)){
-						  		$url = bp_core_get_user_domain($user_id).'/'.BP_SETTINGS_SLUG;
-							  	}else{
-							  		$url = bp_core_get_user_domain($user_id).'/settings';
-							  	}
-						  	}else{
-						  		$url = home_url();
-						  	}
-						  	
-							wp_redirect($url);
+							wp_safe_redirect(home_url());
 							exit;
 							
 						}
