@@ -60,7 +60,7 @@ class bp_social_connect_twitter extends bpc_config{
 
 	function get_twitter_auth_url() {
 		//if (!$_SESSION['twitter_oauth_url']){
-			session_destroy();
+
 			$this->initialise();
 			$request_token = $this->twitter->getRequestToken($this->settings['twitter_callback']);
 			
@@ -88,7 +88,6 @@ class bp_social_connect_twitter extends bpc_config{
 				$this->initialise();
 				$oauth_token = $_SESSION['twitter_oauth_token'];
 				$oauth_token_secret = $_SESSION['twitter_oauth_token_secret'];
-				echo $oauth_token .' == '. $_REQUEST['oauth_token'];
 
 				if( isset( $oauth_token ) && $oauth_token == $_REQUEST['oauth_token'] ){ 
 					$this->twitter = new TwitterOAuth( $this->settings['twitter_consumer_key'] ,$this->settings['twitter_consumer_secret'], $oauth_token, $oauth_token_secret );
