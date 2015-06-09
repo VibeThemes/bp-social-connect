@@ -11,7 +11,7 @@ License : GPLv2 or Later
 
 
 
-/*====== BEGIN VSLIDER======*/
+/*====== BEGIN BP SOCIAL CONNECT =====*/
 include_once('includes/class.config.php');
 
 include_once('includes/social/facebook/class.facebook.php');
@@ -25,7 +25,7 @@ add_action('plugins_loaded','bp_social_connect_translations');
 function bp_social_connect_translations(){
     $locale = apply_filters("plugin_locale", get_locale(), 'bp-social-connect');
     $lang_dir = dirname( __FILE__ ) . '/languages/';
-    $mofile        = sprintf( '%1$s-%2$s.mo', 'realtime-chat', $locale );
+    $mofile        = sprintf( '%1$s-%2$s.mo', 'bp-social-connect', $locale );
     $mofile_local  = $lang_dir . $mofile;
     $mofile_global = WP_LANG_DIR . '/plugins/' . $mofile;
 

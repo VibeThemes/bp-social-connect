@@ -40,9 +40,6 @@ class bp_social_connect_twitter extends bpc_config{
 	}
 	function initialise(){
 		if($this->settings['twitter']){
-			if (!session_id()){
-				session_start();
-			}
 			require_once "twitteroauth.php";
 			$this->twitter = new TwitterOAuth( $this->settings['twitter_consumer_key'] ,$this->settings['twitter_consumer_secret']);
 		}
@@ -65,11 +62,14 @@ class bp_social_connect_twitter extends bpc_config{
 			$request_token = $this->twitter->getRequestToken($this->settings['twitter_callback']);
 			
 			if(200 == $this->twitter->http_code){
-				$_SESSION['twitter_oauth_token']=$request_token['oauth_token'];
-				$_SESSION['twitter_oauth_token_secret']=$request_token['oauth_token'];
+				set_transient('twitter_oauth_token',$request_token['oauth_token'],time()+3600);
+				set_transient('twitter_oauth_token_secret',$request_token['oauth_token_secret'],time()+3600);
+				//$_SESSION['twitter_oauth_token']=$request_token['oauth_token'];
+				//$_SESSION['twitter_oauth_token_secret']=$request_token['oauth_token'];
 				$token = $request_token['oauth_token'];
 				$this->twitter_url = $this->twitter->getAuthorizeURL( $token );
-				$_SESSION['twitter_oauth_url'] = $this->twitter_url;
+				set_transient('twitter_oauth_url',$this->twitter_url,time()+3600);
+				//$_SESSION['twitter_oauth_url'] = $this->twitter_url;
 			}else{
 				$this->twitter_url = '';
 			}
@@ -86,16 +86,18 @@ class bp_social_connect_twitter extends bpc_config{
 			if ( isset( $_REQUEST['oauth_verifier'] ) && isset( $_REQUEST['oauth_token'] ) ) { 
 
 				$this->initialise();
-				$oauth_token = $_SESSION['twitter_oauth_token'];
-				$oauth_token_secret = $_SESSION['twitter_oauth_token_secret'];
+				$oauth_token = get_transient('twitter_oauth_token');//$_SESSION['twitter_oauth_token'];
+				$oauth_token_secret = get_transient('twitter_oauth_token_secret');//$_SESSION['twitter_oauth_token_secret'];
 
 				if( isset( $oauth_token ) && $oauth_token == $_REQUEST['oauth_token'] ){ 
 					$this->twitter = new TwitterOAuth( $this->settings['twitter_consumer_key'] ,$this->settings['twitter_consumer_secret'], $oauth_token, $oauth_token_secret );
 
 					$twitter_access_token = $this->twitter->getAccessToken($_REQUEST['oauth_verifier']);
 					
-					$_SESSION['twitter_oauth_token']=$twitter_access_token['oauth_token'];
-					$_SESSION['twitter_oauth_token_secret']=$twitter_access_token['oauth_token_secret'];
+					set_transient('twitter_oauth_token',$twitter_access_token['oauth_token'],time()+3600);
+					set_transient('twitter_oauth_token_secret',$twitter_access_token['oauth_token_secret'],time()+3600);
+					//$_SESSION['twitter_oauth_token']=$twitter_access_token['oauth_token'];
+					//$_SESSION['twitter_oauth_token_secret']=$twitter_access_token['oauth_token_secret'];
 					
 					//Data Capture from Twitter 
 					$twitter_user = (array)$this->twitter->get('account/verify_credentials');
@@ -104,7 +106,7 @@ class bp_social_connect_twitter extends bpc_config{
 					if (isset($twitter_user['id'])){
 
 						//all data will assign to a session
-						$_SESSION['twitter_user']=$twitter_user;
+						//$_SESSION['twitter_user']=$twitter_user;
 
 						foreach($this->fields as $key => $value){
 							$this->fields[$key] = $twitter_user[$key];
@@ -116,8 +118,8 @@ class bp_social_connect_twitter extends bpc_config{
 						));
 						
 
-						if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
-							$_SESSION['user_login'] = $users[0]->user_login;
+						if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){	
+							//$_SESSION['user_login'] = $users[0]->user_login;
 							$this->force_login_user($users[0]->user_login,false);
 							wp_safe_redirect(home_url());
 							exit;
