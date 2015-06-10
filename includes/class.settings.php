@@ -123,7 +123,7 @@ class bp_social_connect_settings extends bpc_config{
 					'label' => __('APP ID','vibe-customtypes'),
 					'name' => 'facebook_app_id',
 					'type' => 'text',
-					'desc' => __('Set your Facebook APP ID','vibe-customtypes')
+					'desc' => sprintf(__('Set your Facebook APP ID, create a new app from %s','vibe-customtypes'),'<a href="https://developers.facebook.com/">https://developers.facebook.com/</a>'),
 				),
 				array(
 					'label' => __('APP Secret','vibe-customtypes'),
@@ -187,7 +187,7 @@ class bp_social_connect_settings extends bpc_config{
 					'label' => __('Client ID','vibe-customtypes'),
 					'name' => 'google_client_id',
 					'type' => 'text',
-					'desc' => __('Set your Google client id','vibe-customtypes')
+					'desc' => sprintf(__('Set your Google client id, create a new project for web and grab the client id from %s','vibe-customtypes'),'<a href="https://console.developers.google.com">https://console.developers.google.com</a>'),
 				),
 				array(
 					'label' => __('Client Secret','vibe-customtypes'),
