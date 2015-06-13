@@ -27,9 +27,11 @@ class bp_social_connect_google extends bpc_config{
 	}
 
 	function verify(){
-		if ( $this->settings['google'] && isset($this->settings['google_client_id']) && isset($this->settings['google_client_secret']) && isset($this->settings['google_redirect_uri']) ) 
+		if ( $this->settings['google'] && isset($this->settings['google_client_id']) && isset($this->settings['google_client_secret']) && isset($this->settings['google_redirect_uri']) ) {
 			return true;
-		else
+			if(!session_id())
+				session_start();
+		}else
 			return false;
 	}
 
@@ -113,7 +115,6 @@ class bp_social_connect_google extends bpc_config{
 			if ( !empty( $gplus_access_token ) ) {
 				// capture data
 				$user_info = $this->googleplus->people->get('me');
-				
 				$user_email = $this->googleoauth2->userinfo->get(); // to get email
 
 				$user_info['email'] = $user_email['email'];
@@ -133,7 +134,6 @@ class bp_social_connect_google extends bpc_config{
 						'meta_compare' => '='
 					));
 
-					$user_id='';
 					if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
 						$user_id = $users[0]->ID;
 						$this->force_login($users[0]->user_email,false);
@@ -141,47 +141,48 @@ class bp_social_connect_google extends bpc_config{
 						die();
 					} 
 
-					if(!is_numeric($user_id)){
-						$email = $this->fields['email'];
-						if( email_exists( $email )) { // user is a member 
-							  $user = get_user_by('email',$email );
-							  if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
-							  $user_id = $user[0]->ID;
-							  update_user_meta($user_id,$this->google_meta_key,$user_info['id']);
-							  $this->force_login($email ,false);
-							  wp_redirect(site_url());
-							  die();
-							}
-					    }else{ // Register this new user
-						    $random_password = wp_generate_password( 10, false );
-						    $user_id = wp_create_user( $email , $random_password, $email );
-						    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
-						    wp_update_user(
-						    	array(
-						    		'ID' =>$user_id,
-						    		'user_url'=> $this->fields['link'],
-						    		'user_nicename'=>$this->fields['given_name'],
-						    		'display_name'=>$this->fields['name'],
-						    		)
-						    	);
-							if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
-						   	    if(count($this->settings['google_map_fields']['field'])){ 
-						   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){
-						   	  	 		xprofile_set_field_data($this->settings['google_map_fields']['bpfield'][$g_key],$user_id,$this->fields[$g_field]);
-						   	  	   }
-						   	    }
-						    }
-							// Grab Image and set as 
-						    $thumb = $user_email['picture'].'?sz='.BP_AVATAR_THUMB_WIDTH;
-						    $full = $user_email['picture'].'?sz='.BP_AVATAR_FULL_WIDTH;
-						  	$this->grab_avatar($thumb,'thumb',$user_id);
-						  	$this->grab_avatar($full,'full',$user_id);
-						  	//Redirect JSON
-						  	$this->force_login($this->fields['email'],false);
-						    wp_redirect(home_url());
-						    die();
+					$email = $this->fields['email'];
+
+					if( email_exists( $email )) { // user is a member 
+						  $user = get_user_by('email',$email ); 
+
+						 //print_r($user->ID);
+						  if (is_numeric($user->ID)){
+						  $this->force_login($this->fields['email'] ,false);
+						  wp_redirect(site_url());
+						  update_user_meta($user->ID,$this->google_meta_key,$user_info['id']);
+						  die();
+						}
+				    }else{ // Register this new user
+					    $random_password = wp_generate_password( 10, false );
+					    $user_id = wp_create_user( $email , $random_password, $email );
+					    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
+					    wp_update_user(
+					    	array(
+					    		'ID' =>$user_id,
+					    		'user_url'=> $this->fields['link'],
+					    		'user_nicename'=>$this->fields['given_name'],
+					    		'display_name'=>$this->fields['name'],
+					    		)
+					    	);
+						if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
+					   	    if(count($this->settings['google_map_fields']['field'])){ 
+					   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){
+					   	  	 		xprofile_set_field_data($this->settings['google_map_fields']['bpfield'][$g_key],$user_id,$this->fields[$g_field]);
+					   	  	   }
+					   	    }
 					    }
-					}
+						// Grab Image and set as 
+					    $thumb = $user_email['picture'].'?sz='.BP_AVATAR_THUMB_WIDTH;
+					    $full = $user_email['picture'].'?sz='.BP_AVATAR_FULL_WIDTH;
+					  	$this->grab_avatar($thumb,'thumb',$user_id);
+					  	$this->grab_avatar($full,'full',$user_id);
+					  	//Redirect JSON
+					  	$this->force_login($this->fields['email'],false);
+					    wp_redirect(home_url());
+					    die();
+				    }
+					
 				}
 			}
 				
