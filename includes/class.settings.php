@@ -92,10 +92,10 @@ class bp_social_connect_settings extends bpc_config{
 					}
 					.bp_social_connect a:focus{
 						box-shadow: inset 0 4px 0 rgba(0,0,0,0.1)
-					}
+					}					
 					#bp_social_connect_twitter{
 						background:#4099FF;
-					}
+					}					
 					#bp_social_connect_google{
 						background:#DD4B39;
 					}',
