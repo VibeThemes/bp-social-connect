@@ -50,7 +50,7 @@ class bp_social_connect_google extends bpc_config{
 		if(!$this->verify())
 			return;
 		
-		echo '<a id="bp_social_connect_google" href="'.$this->get_google_auth_url().'">'.__('GOOGLE','bp-social-connect').'</a>';	
+		echo apply_filters('bp_social_connect_google_button','<a id="bp_social_connect_google" href="'.$this->get_google_auth_url().'">'.__('GOOGLE','bp-social-connect').'</a>',$this->get_google_auth_url());	
 	}
 
 	function load_google(){
