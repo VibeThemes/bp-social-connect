@@ -48,11 +48,12 @@ abstract class bpc_config{
 		$dir = $base_dir['basedir'].'/avatars/'.$user_id;
 		is_dir($dir) || @mkdir($dir) || die(__("Can't Create folder","bp_social_connect"));
 		if($type=='thumb'){
-			copy($link, $dir .'/'.$user_id.'-bpthumb.jpg');	
+			copy($link, '"'.$dir .'/'.$user_id.'-bpthumb.jpg"');	
 		}else if($type=='full'){
-			copy($link, $dir .'/'.$user_id.'-bpfull.jpg');
+			copy($link, '"'.$dir .'/'.$user_id.'-bpfull.jpg"');
 		}
 	}
+	
 	function generate_username($username){
 		if(username_exists($username)){
 			$rand = rand(1,9);
