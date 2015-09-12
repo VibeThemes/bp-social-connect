@@ -72,16 +72,28 @@ class bp_social_connect_facebook extends bpc_config{
 			js.src = "//connect.facebook.net/en_US/all.js";
 			ref.parentNode.insertBefore(js, ref);
 		}(document));
+		<?php
+		if(isset($this->settings['facebook_map_fields']) && is_array($this->settings['facebook_map_fields'])){
+			if(count($this->settings['facebook_map_fields']['field'])){
+				$key = array_search('email',$this->settings['facebook_map_fields']['field']);
+				if(!empty($key))
+					unset($this->settings['facebook_map_fields']['field'][$key]);
 
+	   	  	    $fb_keys = '?fields=email,'.implode(',',$this->settings['facebook_map_fields']['field']);
+	   	  	}else{
+	   	  		$fb_keys = '?fields=email';
+	   	  	}
+   	  	}
+		?>
 		jQuery(document).ready(function($){
-			$('#bp_social_connect_facebook').on('click',function(){
+			$('.bp_social_connect_facebook').on('click',function(){
 
 				var $this = $(this);
 				$this.addClass('loading');
 				var security = $('#<?php echo $this->security_key; ?>').val();
 				FB.login(function(response){
 					if (response.authResponse){
-						FB.api('/me', function(response) {
+						FB.api('/me<?php echo $fb_keys;?>', function(response) {
 							console.log(response);
 							jQuery.ajax({
 								url: ajaxurl,
@@ -92,13 +104,13 @@ class bp_social_connect_facebook extends bpc_config{
 									$this.removeClass('loading');
 									if(typeof data =='object'){
 									  /* redirect after form */
-									  window.location.href = "<?php echo site_url();?>";
+									 window.location.href = "<?php echo home_url();?>";
 									}else{
-										console.log(data);
+										window.location.href = "<?php echo home_url();?>";
 									}
 								},
 								error: function(){
-									alert('Unable to process login');
+									window.location.href = "<?php echo home_url();?>";
 								}
 							});
 						
@@ -111,7 +123,7 @@ class bp_social_connect_facebook extends bpc_config{
 		});
 		</script>
 		<?php
-		echo '<a id="bp_social_connect_facebook" href="javascript:void(0)">'.__('FACEBOOK','bp-social-connect').'</a><br />';	
+		echo '<a class="bp_social_connect_facebook" href="javascript:void(0)">'.__('FACEBOOK','bp-social-connect').'</a><br />';	
 	}
 
 
@@ -135,13 +147,13 @@ class bp_social_connect_facebook extends bpc_config{
 
 		//Check if facebook ID already connected to any User
 
-		if (isset($id) && $id != '' && $id != 'undefined'){
+		if (isset($id) && $id != '' && $id != 'undefined'){ 
 			$users = get_users(array(
 				'meta_key'     => $this->facebook_meta_key,
 				'meta_value'   => $id,
 				'meta_compare' => '='
 			));
-			if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){
+			if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){ print_r($users);
 				$user_id = $users[0]->ID;
 				$this->force_login($users[0]->user_email,false);
 				//Redirect JSON
@@ -152,7 +164,7 @@ class bp_social_connect_facebook extends bpc_config{
 		}
 
 
-		if(!is_numeric($user_id)){
+		if(!is_numeric($user_id)){ 
 			//Check if facebook email is already being used by another user
 			if( email_exists( $email )) { // user is a member 
 				  $user = get_user_by('email',$email );
@@ -162,9 +174,11 @@ class bp_social_connect_facebook extends bpc_config{
 				  $return=json_encode($return);
 				  if(is_array($return)){ print_r($return); }else{ echo $return; } die;
 				  die();
-		    }else{ // Register this new user
+		    }else{ // Register this new user 
 			    $random_password = wp_generate_password( 10, false );
+			   
 			    $user_id = wp_create_user( $email , $random_password, $email );
+			    
 			    //Add facebook user ID to User meta field
 			    update_user_meta($user_id,$this->facebook_meta_key,$id);
 
@@ -185,8 +199,9 @@ class bp_social_connect_facebook extends bpc_config{
 					    		)
 					    	);
 				// Grab Image and set as 
-			    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
-			    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
+			    $thumb = urlencode('"http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT.'"');
+			    $full = urlencode('"http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT.'"');
+			  	
 			  	$this->grab_avatar($thumb,'thumb',$user_id);
 			  	$this->grab_avatar($full,'full',$user_id);
 			  	//Redirect JSON
