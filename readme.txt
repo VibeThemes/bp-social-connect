@@ -3,7 +3,7 @@ Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
 Tested up to: 4.2.2
-Stable tag: 1.0 
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,12 @@ Report bugs, suggest ideas, and participate in development at <a href="https://v
 
 
 == Upgrade Notice ==
+
+= 1.2 =
+Fixes for FB  Login issues
+
+= 1.1 =
+Add buttons on BuddyPress registration page
 
 = 1.0 =
 Initialise 1.0
