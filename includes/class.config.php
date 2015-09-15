@@ -74,13 +74,13 @@ abstract class bpc_config{
 		if ( !is_user_logged_in() ) {
 			$user = get_user_by('email', $user_email );
 			wp_set_current_user( $user->ID, $user->user_login );
-			wp_set_auth_cookie( $user->ID, $remember );
+			wp_set_auth_cookie( $user->ID );
 			do_action( 'wp_login', $user->user_login );
 		} else {
 			wp_logout();
 			$user = get_user_by('email', $user_email );
 			wp_set_current_user( $user->ID, $user->user_login );
-			wp_set_auth_cookie( $user->ID, $remember );
+			wp_set_auth_cookie( $user->ID );
 			do_action( 'wp_login', $user->user_login );
 		}
 		ob_end_clean();
@@ -90,13 +90,13 @@ abstract class bpc_config{
 		if ( !is_user_logged_in() ) {
 			$user = get_user_by('login', $username );
 			wp_set_current_user( $user->ID, $user->user_login );
-			wp_set_auth_cookie( $user->ID, $remember );
+			wp_set_auth_cookie( $user->ID );
 			do_action( 'wp_login', $user->user_login );
 		} else {
 			wp_logout();
 			$user = get_user_by('login', $username );
 			wp_set_current_user( $user->ID, $user->user_login );
-			wp_set_auth_cookie( $user->ID, $remember );
+			wp_set_auth_cookie( $user->ID );
 			do_action( 'wp_login', $user->user_login );
 		}
 		ob_end_clean();
