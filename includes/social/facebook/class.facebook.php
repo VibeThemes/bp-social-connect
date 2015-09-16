@@ -91,25 +91,36 @@ class bp_social_connect_facebook extends bpc_config{
 				var $this = $(this);
 				$this.addClass('loading');
 				var security = $('#<?php echo $this->security_key; ?>').val();
+				
+
 				FB.login(function(response){
 					if (response.authResponse){
+
 						FB.api('/me<?php echo $fb_keys;?>', function(response) {
 							console.log(response);
-							jQuery.ajax({
+							$.ajax({
 								url: ajaxurl,
-								data: 'action=bp_social_connect_facebook_login&id='+response.id+'&username='+response.username+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
-								dataType: 'JSON',
+								data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
 								type: 'POST',
+								dataType: 'JSON',
 								success:function(data){
 									$this.removeClass('loading');
-									if(typeof data =='object'){
-									  /* redirect after form */
-									 window.location.href = "<?php echo home_url();?>";
+									console.log(data);
+									if (data.message){
+										form.parents('.bp_social_connect_facebook').before( data.message );
+									}
+									if (data.redirect_uri){
+										if (data.redirect_uri =='refresh') {
+											document.location.href=jQuery(location).attr('href');
+										} else {
+											document.location.href=data.redirect_uri;
+										}
 									}else{
-										window.location.href = "<?php echo home_url();?>";
+										document.location.href=jQuery(location).attr('href');
 									}
 								},
-								error: function(){
+								error: function(xhr, ajaxOptions, thrownError) {
+									$this.removeClass('loading');
 									window.location.href = "<?php echo home_url();?>";
 								}
 							});
@@ -119,6 +130,18 @@ class bp_social_connect_facebook extends bpc_config{
 
 					}
 				}, {scope: 'email,user_likes', return_scopes: true});
+				function Logout(){
+					FB.logout(function(){document.location.reload();});
+				}
+			 
+				// Load the SDK asynchronously
+				(function(d,s,id){
+					var js, fjs = d.getElementsByTagName(s)[0];
+					if (d.getElementById(id)) {return;}
+					js = d.createElement(s); js.id = id;
+					js.src = "//connect.facebook.net/en_US/sdk.js";					
+					fjs.parentNode.insertBefore(js, fjs);				 	
+				}(document, 'script', 'facebook-jssdk'));
 			});		
 		});
 		</script>
@@ -153,7 +176,7 @@ class bp_social_connect_facebook extends bpc_config{
 				'meta_value'   => $id,
 				'meta_compare' => '='
 			));
-			if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){ print_r($users);
+			if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){ 
 				$user_id = $users[0]->ID;
 				$this->force_login($users[0]->user_email,false);
 				//Redirect JSON
