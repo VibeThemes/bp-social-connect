@@ -48,15 +48,23 @@ abstract class bpc_config{
 		$dir = $base_dir['basedir'].'/avatars/'.$user_id;
 		
 		is_dir($dir) || @mkdir($dir) || die(__("Can't Create folder","bp_social_connect"));
+		if (!file_exists($dir)) {
+		    mkdir($dir, 0777, true);
+		}
 		if(is_writable($dir)){
+			//Get the file
+			$content = file_get_contents($link);
 			if($type == 'thumb'){
-				copy($link, '"'.$dir .'/'.$user_id.'-bpthumb.jpg"');	
+				$fp = fopen($dir .'/'.$user_id.'-bpthumb.jpg', 'w');
 			}else if($type=='full'){
-				copy($link, '"'.$dir .'/'.$user_id.'-bpfull.jpg"');
+				$fp = fopen($dir .'/'.$user_id.'-bpfull.jpg', 'w');
 			}
+			fwrite($fp, $content);
+			fclose($fp);
 		}
 	}
 	
+
 	/** 
 	 * recursively create a long directory path
 	 */
