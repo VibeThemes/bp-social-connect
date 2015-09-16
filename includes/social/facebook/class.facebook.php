@@ -100,7 +100,7 @@ class bp_social_connect_facebook extends bpc_config{
 							console.log(response);
 							$.ajax({
 								url: ajaxurl,
-								data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
+								data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
 								type: 'POST',
 								dataType: 'JSON',
 								success:function(data){
@@ -222,8 +222,8 @@ class bp_social_connect_facebook extends bpc_config{
 					    		)
 					    	);
 				// Grab Image and set as 
-			    $thumb = urlencode('"http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT.'"');
-			    $full = urlencode('"http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT.'"');
+			    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
+			    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
 			  	
 			  	$this->grab_avatar($thumb,'thumb',$user_id);
 			  	$this->grab_avatar($full,'full',$user_id);

@@ -46,14 +46,27 @@ abstract class bpc_config{
 	function grab_avatar($link,$type,$user_id){
 		$base_dir=wp_upload_dir();
 		$dir = $base_dir['basedir'].'/avatars/'.$user_id;
+		
 		is_dir($dir) || @mkdir($dir) || die(__("Can't Create folder","bp_social_connect"));
-		if($type=='thumb'){
-			copy($link, '"'.$dir .'/'.$user_id.'-bpthumb.jpg"');	
-		}else if($type=='full'){
-			copy($link, '"'.$dir .'/'.$user_id.'-bpfull.jpg"');
+		if(is_writable($dir)){
+			if($type == 'thumb'){
+				copy($link, '"'.$dir .'/'.$user_id.'-bpthumb.jpg"');	
+			}else if($type=='full'){
+				copy($link, '"'.$dir .'/'.$user_id.'-bpfull.jpg"');
+			}
 		}
 	}
 	
+	/** 
+	 * recursively create a long directory path
+	 */
+	function createPath($path) {
+	    if (is_dir($path)) return true;
+	    $prev_path = substr($path, 0, strrpos($path, '/', -2) + 1 );
+	    $return = createPath($prev_path);
+	    return ($return && is_writable($prev_path)) ? mkdir($path) : false;
+	}
+
 	function generate_username($username){
 		if(username_exists($username)){
 			$rand = rand(1,9);
