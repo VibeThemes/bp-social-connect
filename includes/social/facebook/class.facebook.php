@@ -75,13 +75,15 @@ class bp_social_connect_facebook extends bpc_config{
 		<?php
 		if(isset($this->settings['facebook_map_fields']) && is_array($this->settings['facebook_map_fields'])){
 			if(count($this->settings['facebook_map_fields']['field'])){
-				$key = array_search('email',$this->settings['facebook_map_fields']['field']);
-				if(!empty($key))
-					unset($this->settings['facebook_map_fields']['field'][$key]);
-
-	   	  	    $fb_keys = '?fields=email,'.implode(',',$this->settings['facebook_map_fields']['field']);
+				$fields = array('email','link','first_name','name');
+				foreach($this->settings['facebook_map_fields']['field'] as $field){
+					if(!in_Array($field,$fields)){
+						$fields[]=$field;
+					}
+				}
+	   	  	    $fb_keys = '?fields='.implode(',',$fields);
 	   	  	}else{
-	   	  		$fb_keys = '?fields=email';
+	   	  		$fb_keys = '?fields=email,link,first_name,name';
 	   	  	}
    	  	}
 		?>
@@ -105,7 +107,6 @@ class bp_social_connect_facebook extends bpc_config{
 								dataType: 'JSON',
 								success:function(data){
 									$this.removeClass('loading');
-									console.log(data);
 									if (data.message){
 										form.parents('.bp_social_connect_facebook').before( data.message );
 									}
@@ -130,18 +131,6 @@ class bp_social_connect_facebook extends bpc_config{
 
 					}
 				}, {scope: 'email,user_likes', return_scopes: true});
-				function Logout(){
-					FB.logout(function(){document.location.reload();});
-				}
-			 
-				// Load the SDK asynchronously
-				(function(d,s,id){
-					var js, fjs = d.getElementsByTagName(s)[0];
-					if (d.getElementById(id)) {return;}
-					js = d.createElement(s); js.id = id;
-					js.src = "//connect.facebook.net/en_US/sdk.js";					
-					fjs.parentNode.insertBefore(js, fjs);				 	
-				}(document, 'script', 'facebook-jssdk'));
 			});		
 		});
 		</script>
@@ -201,7 +190,14 @@ class bp_social_connect_facebook extends bpc_config{
 			    $random_password = wp_generate_password( 10, false );
 			   
 			    $user_id = wp_create_user( $email , $random_password, $email );
-			    
+			    wp_update_user(
+		    	array(
+		    		'ID'=>$user_id,
+		    		'user_url'=> $link,
+		    		'user_nicename'=>$first_name,
+		    		'display_name'=>$name,
+		    		)
+		    	);
 			    //Add facebook user ID to User meta field
 			    update_user_meta($user_id,$this->facebook_meta_key,$id);
 
@@ -213,14 +209,7 @@ class bp_social_connect_facebook extends bpc_config{
 			   	    }
 			    }
 
-			    wp_update_user(
-					    	array(
-					    		'ID'=>$user_id,
-					    		'user_url'=> $link,
-					    		'user_nicename'=>$first_name,
-					    		'display_name'=>$name,
-					    		)
-					    	);
+			    
 				// Grab Image and set as 
 			    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
 			    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
