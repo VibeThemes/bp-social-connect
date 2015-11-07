@@ -155,7 +155,8 @@ class bp_social_connect_google extends bpc_config{
 						}
 				    }else{ // Register this new user
 					    $random_password = wp_generate_password( 10, false );
-					    $user_id = wp_create_user( $email , $random_password, $email );
+					    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$this->fields);
+					    $user_id = wp_create_user( $user_login , $random_password, $email );
 					    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
 					    wp_update_user(
 					    	array(

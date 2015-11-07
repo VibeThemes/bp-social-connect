@@ -188,8 +188,8 @@ class bp_social_connect_facebook extends bpc_config{
 				  die();
 		    }else{ // Register this new user 
 			    $random_password = wp_generate_password( 10, false );
-			   
-			    $user_id = wp_create_user( $email , $random_password, $email );
+			    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$_POST);
+			    $user_id = wp_create_user( $user_login , $random_password, $email );
 			    if(empty($first_name)){
 			    	$first_name = $email;
 			    }
