@@ -3,7 +3,7 @@ Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
 Tested up to: 4.2.2
-Stable tag: 1.2.2
+Stable tag: 1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,7 @@ Connect your BuddyPress site with popular social networks. This plugin will allo
 3. Twitter
 
 
+Tutorial On how to setup and get started : <a href="http://vibethemes.com/documentation/wplms/knowledge-base/using-social-connect-plugin-with-wplms/">link</a>
 
 = More Information =
 
@@ -75,7 +76,11 @@ Report bugs, suggest ideas, and participate in development at <a href="https://v
 
 == Screenshots ==
 
-
+1. BuddyPress registration page
+2. WP Login page
+3. With WPLMS Default Theme
+4. With WPLMS Child Theme
+5. Settings in WP ADmin panel
 
 == Upgrade Notice ==
 
