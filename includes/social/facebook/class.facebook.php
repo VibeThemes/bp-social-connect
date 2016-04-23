@@ -1,6 +1,6 @@
 <?php
 
-//require_once "facebook.php";
+ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class bp_social_connect_facebook extends bpc_config{
 
@@ -43,6 +43,7 @@ class bp_social_connect_facebook extends bpc_config{
 	function display_social_login(){
 		if(!$this->settings['facebook'])
 			return;
+		wp_enqueue_script('jquery');
 		?>
 		<div id="fb-root" class="bp_social_connect_fb"></div>
 		<script type="text/javascript">
@@ -88,54 +89,53 @@ class bp_social_connect_facebook extends bpc_config{
    	  	}
 		?>
 		jQuery(document).ready(function($){
+			$('.bp_social_connect_facebook').unbind('click');
 			$('.bp_social_connect_facebook').on('click',function(){
+					var $this = $(this);
+					$this.addClass('loading');
+					var security = $('#<?php echo $this->security_key; ?>').val();
+					FB.login(function(response){
+						if (response.authResponse){
 
-				var $this = $(this);
-				$this.addClass('loading');
-				var security = $('#<?php echo $this->security_key; ?>').val();
-				
-
-				FB.login(function(response){
-					if (response.authResponse){
-
-						FB.api('/me<?php echo $fb_keys;?>', function(response) {
-							console.log(response);
-							$.ajax({
-								url: ajaxurl,
-								data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
-								type: 'POST',
-								dataType: 'JSON',
-								success:function(data){
-									$this.removeClass('loading');
-									if (data.message){
-										form.parents('.bp_social_connect_facebook').before( data.message );
-									}
-									if (data.redirect_uri){
-										if (data.redirect_uri =='refresh') {
-											document.location.href=jQuery(location).attr('href');
-										} else {
-											document.location.href=data.redirect_uri;
+							FB.api('/me<?php echo $fb_keys;?>', function(response) {
+								console.log(response);
+								$.ajax({
+									url: ajaxurl,
+									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
+									type: 'POST',
+									dataType: 'JSON',
+									success:function(data){
+										$this.removeClass('loading');
+										console.log(data);
+										if (data.message){
+											form.parents('.bp_social_connect_facebook').before( data.message );
 										}
-									}else{
-										document.location.href=jQuery(location).attr('href');
+										if (data.redirect_uri){
+											if (data.redirect_uri =='refresh') {
+												window.location.href =jQuery(location).attr('href');
+											} else {
+												window.location.href = "<?php echo apply_filters('login_redirect',home_url());?>";
+											}
+										}else{
+											window.location.href = "<?php echo apply_filters('login_redirect',home_url());?>";
+										}
+									},
+									error: function(xhr, ajaxOptions, thrownError) {
+										$this.removeClass('loading');
+										window.location.href = "<?php echo home_url();?>";
 									}
-								},
-								error: function(xhr, ajaxOptions, thrownError) {
-									$this.removeClass('loading');
-									window.location.href = "<?php echo home_url();?>";
-								}
+								});
+							
 							});
-						
-						});
-					}else{
+						}else{
 
-					}
-				}, {scope: 'email,user_likes', return_scopes: true});
+						}
+					}, {scope: 'email,user_likes', return_scopes: true});
 			});		
 		});
 		</script>
 		<?php
-		echo '<a class="bp_social_connect_facebook" href="javascript:void(0)">'.__('FACEBOOK','bp-social-connect').'</a><br />';	
+		echo '<a class="bp_social_connect_facebook" href="javascript:void(0)">'.__('FACEBOOK','bp-social-connect').'</a>';	
 	}
 
 
