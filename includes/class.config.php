@@ -1,5 +1,8 @@
 <?php
 
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 abstract class bpc_config{
 
 	var $version = '1.0';
