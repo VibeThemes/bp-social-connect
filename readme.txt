@@ -2,8 +2,8 @@
 Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
-Tested up to: 4.2.2
-Stable tag: 1.3
+Tested up to: 4.5
+Stable tag: 1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,6 @@ Connect your BuddyPress site with popular social networks. This plugin will allo
 
 1. Facebook 
 2. Google
-3. Twitter
 
 
 Tutorial On how to setup and get started : <a href="http://vibethemes.com/documentation/wplms/knowledge-base/using-social-connect-plugin-with-wplms/">link</a>
