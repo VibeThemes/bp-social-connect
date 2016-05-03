@@ -98,7 +98,6 @@ class bp_social_connect_facebook extends bpc_config{
 						if (response.authResponse){
 
 							FB.api('/me<?php echo $fb_keys;?>', function(response) {
-								console.log(response);
 								$.ajax({
 									url: ajaxurl,
 									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
@@ -107,14 +106,11 @@ class bp_social_connect_facebook extends bpc_config{
 									success:function(data){
 										$this.removeClass('loading');
 										console.log(data);
-										if (data.message){
-											form.parents('.bp_social_connect_facebook').before( data.message );
-										}
 										if (data.redirect_uri){
 											if (data.redirect_uri =='refresh') {
 												window.location.href =jQuery(location).attr('href');
 											} else {
-												window.location.href = "<?php echo apply_filters('login_redirect',home_url());?>";
+												window.location.href = data.redirect_uri;
 											}
 										}else{
 											window.location.href = "<?php echo apply_filters('login_redirect',home_url());?>";
@@ -167,11 +163,21 @@ class bp_social_connect_facebook extends bpc_config{
 			));
 			if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){ 
 				$user_id = $users[0]->ID;
-				$this->force_login($users[0]->user_email,false);
-				//Redirect JSON
-				$return=json_encode($return);
-				if(is_array($return)){ print_r($return); }else{ echo $return; }
-				die();
+				$wpuser = $this->force_login($users[0]->user_email,false);
+				if(is_wp_error($wpuser)){
+					$message = $wpuser->get_error_message();
+					$return = array('redirect_uri'=>wp_login_url(),'message'=>$message);
+					echo json_encode($return);
+					die();
+				}else{
+					//Redirect JSON
+					$redirect_url = $this->settings['redirect_link'];
+					echo $redirect_url;
+					$url = apply_filters('login_redirect',$redirect_url,home_url(),$wpuser);
+					$return=json_encode(array('redirect_uri'=>$url,'message'=>'success1'));
+					if(is_array($return)){ print_r($return); }else{ echo $return; }
+					die();
+				}
 			} 
 		}
 
@@ -179,12 +185,20 @@ class bp_social_connect_facebook extends bpc_config{
 		if(!is_numeric($user_id)){ 
 			//Check if facebook email is already being used by another user
 			if( email_exists( $email )) { // user is a member 
-				  $user = get_user_by('email',$email );
-				  $user_id = $user->ID;
-				  $this->force_login($user->user_email,false);
+				$user = $this->force_login($email ,false);
+				if(is_wp_error($user)){
+					$message = $user->get_error_message();
+					$return = array('redirect_uri'=>wp_login_url(),'message'=>$message);
+					echo json_encode($return);
+					die();
+				}else{
+			  	  $user_id = $user->ID;
 				  //Redirect JSON
-				  $return=json_encode($return);
+				  $redirect_url = $this->settings['redirect_link'];
+				  $url = apply_filters('login_redirect',$redirect_url,home_url(),$user);
+				  $return=json_encode(array('redirect_uri'=>$url,'message'=>'success2'));
 				  if(is_array($return)){ print_r($return); }else{ echo $return; } die;
+				}
 				  die();
 		    }else{ // Register this new user 
 			    $random_password = wp_generate_password( 10, false );
