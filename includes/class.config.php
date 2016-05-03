@@ -101,10 +101,13 @@ abstract class bpc_config{
 		}
 		$user = get_user_by('email', $user_email );
 		$user = apply_filters( 'authenticate', $user, '', '' );
-		wp_set_current_user( $user->ID, $user->user_login );
-		wp_set_auth_cookie( $user->ID,$remember );
-		do_action( 'wp_login', $user->user_login );
+		if(!is_wp_error($user)){
+			wp_set_current_user( $user->ID, $user->user_login );
+			wp_set_auth_cookie( $user->ID,$remember );
+			do_action( 'wp_login', $user->user_login );
+		}
 		ob_end_clean();
+		return $user;
 	}
 
 	function force_login_user( $username, $remember=true ) { 
@@ -112,7 +115,6 @@ abstract class bpc_config{
 		if ( is_user_logged_in() ) {
 			wp_logout();
 		}
-
 		$user = get_user_by('login', $username );
 		$user = apply_filters( 'authenticate', $user, '', '' );
 		if(!is_wp_error($user)){
@@ -121,5 +123,6 @@ abstract class bpc_config{
 			do_action( 'wp_login', $user->user_login );	
 		}
 		ob_end_clean();
+		return $user;
 	}
 }
