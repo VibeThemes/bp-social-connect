@@ -158,29 +158,30 @@ class bp_social_connect_google extends bpc_config{
 					    $random_password = wp_generate_password( 10, false );
 					    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$this->fields);
 					    $user_id = wp_create_user( $user_login , $random_password, $email );
-					    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
-					    wp_update_user(
-					    	array(
-					    		'ID' =>$user_id,
-					    		'user_url'=> $this->fields['link'],
-					    		'user_nicename'=>$this->fields['given_name'],
-					    		'display_name'=>$this->fields['name'],
-					    		)
-					    	);
-						if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
-					   	    if(count($this->settings['google_map_fields']['field'])){ 
-					   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){
-					   	  	 		xprofile_set_field_data($this->settings['google_map_fields']['bpfield'][$g_key],$user_id,$this->fields[$g_field]);
-					   	  	   }
-					   	    }
-					    }
-						// Grab Image and set as 
-					    $thumb = $user_email['picture'].'?sz='.BP_AVATAR_THUMB_WIDTH;
-					    $full = $user_email['picture'].'?sz='.BP_AVATAR_FULL_WIDTH;
-					  	$this->grab_avatar($thumb,'thumb',$user_id);
-					  	$this->grab_avatar($full,'full',$user_id);
-					  	//Redirect JSON
-					  	$this->force_login($this->fields['email'],false);
+					    if ( !is_wp_error($user_id) && is_numeric($user_id)) {
+						    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
+						    wp_update_user(
+						    	array(
+						    		'ID' =>$user_id,
+						    		'user_url'=> $this->fields['link'],
+						    		'display_name'=>$this->fields['name'],
+						    		)
+						    	);
+							if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
+						   	    if(count($this->settings['google_map_fields']['field'])){ 
+						   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){
+						   	  	 		xprofile_set_field_data($this->settings['google_map_fields']['bpfield'][$g_key],$user_id,$this->fields[$g_field]);
+						   	  	   }
+						   	    }
+						    }
+							// Grab Image and set as 
+						    $thumb = $user_email['picture'].'?sz='.BP_AVATAR_THUMB_WIDTH;
+						    $full = $user_email['picture'].'?sz='.BP_AVATAR_FULL_WIDTH;
+						  	$this->grab_avatar($thumb,'thumb',$user_id);
+						  	$this->grab_avatar($full,'full',$user_id);
+						  	//Redirect JSON
+						  	$this->force_login($this->fields['email'],false);
+						}
 					    wp_redirect(home_url());
 					    die();
 				    }

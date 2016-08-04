@@ -35,7 +35,7 @@ class init_bp_social_connect extends bpc_config{
 
 	function styling(){
 		echo '<style>.bp_social_connect { display: inline-block; width: 100%; }
-			.bp_social_connect_facebook{background:#3b5998;}.bp_social_connect_google{background:#DD4B39;}.bp_social_connect > a{text-align:center;float:left;padding:15px;border-radius:2px;color:#fff !important;width:200px;margin:0 5px;}.bp_social_connect > a:first-child{margin-left:0;}
+			.bp_social_connect_facebook{background:#3b5998;}.bp_social_connect_google{background:#DD4B39 !important;}.bp_social_connect > a{text-align:center;float:left;padding:15px;border-radius:2px;color:#fff !important;width:200px;margin:0 5px;}.bp_social_connect > a:first-child{margin-left:0;}
 			.bp_social_connect > a:before{float:left;font-size:16px;font-family:fontawesome;opacity:0.6;}.bp_social_connect_facebook:before{content:"\f09a";}.bp_social_connect_google:before{content:"\f0d5";}</style>';
 	}
 	function verify_email(){	

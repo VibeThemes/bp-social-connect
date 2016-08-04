@@ -113,7 +113,7 @@ class bp_social_connect_facebook extends bpc_config{
 												window.location.href = data.redirect_uri;
 											}
 										}else{
-											window.location.href = "<?php echo apply_filters('login_redirect',home_url());?>";
+											window.location.href = "<?php echo home_url();?>";
 										}
 									},
 									error: function(xhr, ajaxOptions, thrownError) {
@@ -201,44 +201,49 @@ class bp_social_connect_facebook extends bpc_config{
 				}
 				  die();
 		    }else{ // Register this new user 
-			    $random_password = wp_generate_password( 10, false );
-			    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$_POST);
-			    $user_id = wp_create_user( $user_login , $random_password, $email );
-			    if(empty($first_name)){
-			    	$first_name = $email;
-			    }
-			    wp_update_user(
-		    	array(
-		    		'ID'=>$user_id,
-		    		'user_url'=> $link,
-		    		'user_nicename'=>$first_name,
-		    		'display_name'=>$name,
-		    		)
-		    	);
-			    //Add facebook user ID to User meta field
-			    update_user_meta($user_id,$this->facebook_meta_key,$id);
-
-				if(isset($this->settings['facebook_map_fields']) && is_array($this->settings['facebook_map_fields'])){
-			   	    if(count($this->settings['facebook_map_fields']['field'])){
-			   	  	   foreach($this->settings['facebook_map_fields']['field'] as $fb_key => $fb_field){
-			   	  	 		xprofile_set_field_data($this->settings['facebook_map_fields']['bpfield'][$fb_key],$user_id,$$fb_field);
-			   	  	   }
-			   	    }
-			    }
-
 			    
-				// Grab Image and set as 
-			    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
-			    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
-			  	
-			  	$this->grab_avatar($thumb,'thumb',$user_id);
-			  	$this->grab_avatar($full,'full',$user_id);
-			  	//Redirect JSON
-			  	$this->force_login($email,false);
-			  	$return=json_encode($return);
-				if(is_array($return)){ print_r($return); }else{ echo $return; } die;
-			  	
-			  	die();
+			    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$_POST);
+			    $user_login .=rand(0,999);
+			    $user_id = register_new_user($user_login, $email);
+		    	if ( !is_wp_error($user_id) && is_numeric($user_id)) {
+					
+				    if(empty($first_name)){
+				    	$first_name = $email;
+				    }
+				    wp_update_user(
+			    	array(
+			    		'ID'=>$user_id,
+			    		'user_url'=> $link,
+			    		'display_name'=>$name,
+			    		)
+			    	);
+				    //Add facebook user ID to User meta field
+				    update_user_meta($user_id,$this->facebook_meta_key,$id);
+
+					if(isset($this->settings['facebook_map_fields']) && is_array($this->settings['facebook_map_fields'])){
+				   	    if(count($this->settings['facebook_map_fields']['field'])){
+				   	  	   foreach($this->settings['facebook_map_fields']['field'] as $fb_key => $fb_field){
+				   	  	 		xprofile_set_field_data($this->settings['facebook_map_fields']['bpfield'][$fb_key],$user_id,$$fb_field);
+				   	  	   }
+				   	    }
+				    }
+
+				    
+					// Grab Image and set as 
+				    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
+				    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
+				  	
+				  	$this->grab_avatar($thumb,'thumb',$user_id);
+				  	$this->grab_avatar($full,'full',$user_id);
+				  	//Redirect JSON
+				  	$this->force_login($email,false);
+				  	$return=json_encode($return);
+					if(is_array($return)){ print_r($return); }else{ echo $return; } die;
+				  	
+				  	die();
+				}else{
+					_e('User not created','vibe');
+				}
 		    }
 		}
 	}
