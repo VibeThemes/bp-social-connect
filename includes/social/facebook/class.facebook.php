@@ -179,6 +179,7 @@ class bp_social_connect_facebook extends bpc_config{
 					die();
 				}
 			} 
+			
 		}
 
 
@@ -197,9 +198,9 @@ class bp_social_connect_facebook extends bpc_config{
 				  $redirect_url = $this->settings['redirect_link'];
 				  $url = apply_filters('login_redirect',$redirect_url,home_url(),$user);
 				  $return=json_encode(array('redirect_uri'=>$url,'message'=>'success2'));
-				  if(is_array($return)){ print_r($return); }else{ echo $return; } die;
+				  if(is_array($return)){ print_r($return); }else{ echo $return; }
 				}
-				  die();
+				die();
 		    }else{ // Register this new user 
 			    
 			    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$_POST);

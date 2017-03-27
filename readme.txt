@@ -2,8 +2,8 @@
 Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
-Tested up to: 4.5
-Stable tag: 1.4
+Tested up to: 4.7.4
+Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -83,6 +83,34 @@ Report bugs, suggest ideas, and participate in development at <a href="https://v
 
 == Upgrade Notice ==
 
+= 1.4.1 =
+* facebook login changes admin name
+* version1.4
+* facebook fixed
+* remove BPsocial connect Twitter
+* make sure the user is not an error
+= 1.4 =
+* twitter login fixes
+* google login fixes
+* facebook login fixes
+* bp social connect styling
+* remove mapping field on click
+* Auth filter added for warnings and redirection
+* Google and Facebook username filters
+* Empty first name check
+= 1.3 =
+* Facebook keys fixed
+* Image copy updated
+= 1.2.2 =
+* Writable Check on Directory for avatars
+* FB Fix
+= 1.2.1 =
+* Remember hook removed from Set auth cookie
+* version update
+* Update readme
+* Copy link fixes to move images
+* FB Keys and Fixes
+* Google button filter
 = 1.2 =
 Fixes for FB  Login issues
 

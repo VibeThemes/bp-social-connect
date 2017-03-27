@@ -23,7 +23,7 @@ class bp_social_connect_google extends bpc_config{
 	function __construct(){
 		$this->settings = $this->get();
 		add_action('bp_social_connect',array($this,'display_social_login'));
-		add_action('template_redirect', array($this, 'google_authorize'));
+		add_action('template_redirect', array($this, 'google_authorize'),1 );
 		add_filter('bp_social_connect_google_fields',array($this,'map_fields'));
 	}
 
