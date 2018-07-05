@@ -1,3 +1,5 @@
+* 1.5
+* wp_login parameter bug fix
 * 1.4.1
 * facebook login changes admin name
 * version1.4
