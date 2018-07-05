@@ -104,7 +104,7 @@ abstract class bpc_config{
 		if(!is_wp_error($user)){
 			wp_set_current_user( $user->ID, $user->user_login );
 			wp_set_auth_cookie( $user->ID,$remember );
-			do_action( 'wp_login', $user->user_login );
+			do_action( 'wp_login', $user->user_login, $user );
 		}
 		ob_end_clean();
 		return $user;
@@ -120,7 +120,7 @@ abstract class bpc_config{
 		if(!is_wp_error($user)){
 			wp_set_current_user( $user->ID, $user->user_login );
 			wp_set_auth_cookie( $user->ID,$remember );
-			do_action( 'wp_login', $user->user_login );	
+			do_action( 'wp_login', $user->user_login, $user );	
 		}
 		ob_end_clean();
 		return $user;
