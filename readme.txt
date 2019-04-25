@@ -3,7 +3,7 @@ Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
 Tested up to: 4.7.4
-Stable tag: 1.5
+Stable tag: 1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,8 @@ Report bugs, suggest ideas, and participate in development at <a href="https://v
 5. Settings in WP ADmin panel
 
 == Upgrade Notice ==
+= 1.6 =
+*fb logo
 = 1.5 =
 * WP_login hook update (thanks to Martin Marty)
 = 1.4.2 =
