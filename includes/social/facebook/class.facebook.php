@@ -44,7 +44,11 @@ class bp_social_connect_facebook extends bpc_config{
 		if(!$this->settings['facebook'])
 			return;
 		wp_enqueue_script('jquery');
+		
 		?>
+		<style>
+			a.bp_social_connect_facebook:before { content: ""!important; width: 16px; height: 16px; background: url(<?php echo plugins_url( '../../../assets/images/fb_logo.png',__FILE__ );?>); background-size: contain; opacity: 1 !important; }
+		</style>
 		<div id="fb-root" class="bp_social_connect_fb"></div>
 		<script type="text/javascript">
 		window.fbAsyncInit = function() {
