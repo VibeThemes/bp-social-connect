@@ -12,6 +12,7 @@ class init_bp_social_connect extends bpc_config{
 		new bp_social_connect_facebook;
 		//new bp_social_connect_twitter;
 		new bp_social_connect_google;
+		new bp_social_connect_linkedin;
 		add_action('wp_head',array($this,'ajaxurl'));
 		add_action('login_footer',array($this,'ajaxurl'));
 		add_action('bp_before_member_body',array($this,'verify_email'));

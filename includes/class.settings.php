@@ -33,6 +33,7 @@ class bp_social_connect_settings extends bpc_config{
 	    		'facebook' => __('Facebook','bp-social-connect'), 
 	    		//'twitter' => __('Twitter','bp-social-connect'), 
 	    		'google' => __('Google','bp-social-connect'), 
+	    		'linkedin' => __('Linkedin','bp-social-connect'), 
 	    		);
 	    echo '<div id="icon-themes" class="icon32"><br></div>';
 	    echo '<h2 class="nav-tab-wrapper">';
@@ -172,6 +173,36 @@ class bp_social_connect_settings extends bpc_config{
 		$settings = apply_filters('bp_social_connect_google_fields',$settings);
 		$this->generate_form('google',$settings);
 		
+	}
+
+	function linkedin(){
+		echo '<h3>'.__('Linkedin Social Connect Settings','bp-social-connect').'</h3>';
+		$settings = array(
+				array(
+					'label' => __('Enable Linkedin Login','vibe-customtypes'),
+					'name' =>'linkedin',
+					'type' => 'select',
+					'options'=>array(
+						'0' => __('No','bp-social-connect'),
+						'1' => __('Yes','bp-social-connect'),
+					),
+					'desc' => __(' Enable Linkedin login','vibe-customtypes')
+				),
+				array(
+					'label' => __('Client Key','vibe-customtypes'),
+					'name' => 'linkedin_consumer_key',
+					'type' => 'text',
+					'desc' => sprintf(__('Set your Linkedin Client Key, create a new app from %s','vibe-customtypes'),'<a href="https://developers.linkedin.com/">https://developers.linkedin.com/</a>'),
+				),
+				array(
+					'label' => __('Client Secret','vibe-customtypes'),
+					'name' => 'linkedin_consumer_secret',
+					'type' => 'text',
+					'desc' => __('Enter linkedin Client secret','vibe-customtypes')
+				),
+			);
+		$settings = apply_filters('bp_social_connect_linkedin_fields',$settings);
+		$this->generate_form('linkedin',$settings);
 	}
 
 	function generate_form($tab,$settings=array()){
