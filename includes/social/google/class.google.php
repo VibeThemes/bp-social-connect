@@ -1,6 +1,7 @@
 <?php
 
-//require_once "facebook.php";
+
+ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class bp_social_connect_google extends bpc_config{
 
@@ -22,7 +23,7 @@ class bp_social_connect_google extends bpc_config{
 	function __construct(){
 		$this->settings = $this->get();
 		add_action('bp_social_connect',array($this,'display_social_login'));
-		add_action('template_redirect', array($this, 'google_authorize'));
+		add_action('template_redirect', array($this, 'google_authorize'),1 );
 		add_filter('bp_social_connect_google_fields',array($this,'map_fields'));
 	}
 
@@ -50,7 +51,7 @@ class bp_social_connect_google extends bpc_config{
 		if(!$this->verify())
 			return;
 		
-		echo apply_filters('bp_social_connect_google_button','<a id="bp_social_connect_google" href="'.$this->get_google_auth_url().'">'.__('GOOGLE','bp-social-connect').'</a>',$this->get_google_auth_url());	
+		echo apply_filters('bp_social_connect_google_button','<a class="bp_social_connect_google" href="'.$this->get_google_auth_url().'">'.__('GOOGLE','bp-social-connect').'</a>',$this->get_google_auth_url());	
 	}
 
 	function load_google(){
@@ -155,30 +156,32 @@ class bp_social_connect_google extends bpc_config{
 						}
 				    }else{ // Register this new user
 					    $random_password = wp_generate_password( 10, false );
-					    $user_id = wp_create_user( $email , $random_password, $email );
-					    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
-					    wp_update_user(
-					    	array(
-					    		'ID' =>$user_id,
-					    		'user_url'=> $this->fields['link'],
-					    		'user_nicename'=>$this->fields['given_name'],
-					    		'display_name'=>$this->fields['name'],
-					    		)
-					    	);
-						if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
-					   	    if(count($this->settings['google_map_fields']['field'])){ 
-					   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){
-					   	  	 		xprofile_set_field_data($this->settings['google_map_fields']['bpfield'][$g_key],$user_id,$this->fields[$g_field]);
-					   	  	   }
-					   	    }
-					    }
-						// Grab Image and set as 
-					    $thumb = $user_email['picture'].'?sz='.BP_AVATAR_THUMB_WIDTH;
-					    $full = $user_email['picture'].'?sz='.BP_AVATAR_FULL_WIDTH;
-					  	$this->grab_avatar($thumb,'thumb',$user_id);
-					  	$this->grab_avatar($full,'full',$user_id);
-					  	//Redirect JSON
-					  	$this->force_login($this->fields['email'],false);
+					    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$this->fields);
+					    $user_id = wp_create_user( $user_login , $random_password, $email );
+					    if ( !is_wp_error($user_id) && is_numeric($user_id)) {
+						    update_user_meta($user_id,$this->google_meta_key,$this->fields['id']);
+						    wp_update_user(
+						    	array(
+						    		'ID' =>$user_id,
+						    		'user_url'=> $this->fields['link'],
+						    		'display_name'=>$this->fields['name'],
+						    		)
+						    	);
+							if(isset($this->settings['google_map_fields']) && is_array($this->settings['google_map_fields'])){
+						   	    if(count($this->settings['google_map_fields']['field'])){ 
+						   	  	   foreach($this->settings['google_map_fields']['field'] as $g_key => $g_field){
+						   	  	 		xprofile_set_field_data($this->settings['google_map_fields']['bpfield'][$g_key],$user_id,$this->fields[$g_field]);
+						   	  	   }
+						   	    }
+						    }
+							// Grab Image and set as 
+						    $thumb = $user_email['picture'].'?sz='.BP_AVATAR_THUMB_WIDTH;
+						    $full = $user_email['picture'].'?sz='.BP_AVATAR_FULL_WIDTH;
+						  	$this->grab_avatar($thumb,'thumb',$user_id);
+						  	$this->grab_avatar($full,'full',$user_id);
+						  	//Redirect JSON
+						  	$this->force_login($this->fields['email'],false);
+						}
 					    wp_redirect(home_url());
 					    die();
 				    }

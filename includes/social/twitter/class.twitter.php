@@ -51,7 +51,7 @@ class bp_social_connect_twitter extends bpc_config{
 	function display_social_login(){
 		if($this->settings['twitter']){
 			$url = $this->settings['callback'];
-			echo '<a id="bp_social_connect_twitter" href="'.$this->get_twitter_auth_url().'">'.__('TWITTER','bp-social-connect').'</a><br />';	
+			echo '<a class="bp_social_connect_twitter" href="'.$this->get_twitter_auth_url().'">'.__('TWITTER','bp-social-connect').'</a>';	
 		}
 	}
 

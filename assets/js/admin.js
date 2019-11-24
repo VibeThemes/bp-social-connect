@@ -9,7 +9,9 @@ jQuery(document).ready(function($){
 		$(this).next().append(cloned);
 	});
 
-	$('.remove_field_map').on('click',function(){
-		$(this).parent().remove();
-	});
+	
+});
+
+jQuery(document).on('click','.remove_field_map',function(){
+	jQuery(this).parent().remove();
 });

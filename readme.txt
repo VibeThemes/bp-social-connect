@@ -2,8 +2,8 @@
 Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
-Tested up to: 4.2.2
-Stable tag: 1.2.2
+Tested up to: 4.7.4
+Stable tag: 1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,9 +24,9 @@ Connect your BuddyPress site with popular social networks. This plugin will allo
 
 1. Facebook 
 2. Google
-3. Twitter
 
 
+Tutorial On how to setup and get started : <a href="http://vibethemes.com/documentation/wplms/knowledge-base/using-social-connect-plugin-with-wplms/">link</a>
 
 = More Information =
 
@@ -75,10 +75,47 @@ Report bugs, suggest ideas, and participate in development at <a href="https://v
 
 == Screenshots ==
 
-
+1. BuddyPress registration page
+2. WP Login page
+3. With WPLMS Default Theme
+4. With WPLMS Child Theme
+5. Settings in WP ADmin panel
 
 == Upgrade Notice ==
-
+= 1.6 =
+*fb logo
+= 1.5 =
+* WP_login hook update (thanks to Martin Marty)
+= 1.4.2 =
+* facebook update
+= 1.4.1 =
+* facebook login changes admin name
+* version1.4
+* facebook fixed
+* remove BPsocial connect Twitter
+* make sure the user is not an error
+= 1.4 =
+* twitter login fixes
+* google login fixes
+* facebook login fixes
+* bp social connect styling
+* remove mapping field on click
+* Auth filter added for warnings and redirection
+* Google and Facebook username filters
+* Empty first name check
+= 1.3 =
+* Facebook keys fixed
+* Image copy updated
+= 1.2.2 =
+* Writable Check on Directory for avatars
+* FB Fix
+= 1.2.1 =
+* Remember hook removed from Set auth cookie
+* version update
+* Update readme
+* Copy link fixes to move images
+* FB Keys and Fixes
+* Google button filter
 = 1.2 =
 Fixes for FB  Login issues
 

@@ -1,5 +1,8 @@
 <?php
 
+
+ if ( ! defined( 'ABSPATH' ) ) exit;
+
 class bp_social_connect_settings extends bpc_config{
 
 	var $settings;
@@ -28,7 +31,7 @@ class bp_social_connect_settings extends bpc_config{
 	    $tabs = array( 
 	    		'general' => __('General','bp-social-connect'), 
 	    		'facebook' => __('Facebook','bp-social-connect'), 
-	    		'twitter' => __('Twitter','bp-social-connect'), 
+	    		//'twitter' => __('Twitter','bp-social-connect'), 
 	    		'google' => __('Google','bp-social-connect'), 
 	    		);
 	    echo '<div id="icon-themes" class="icon32"><br></div>';
@@ -52,11 +55,10 @@ class bp_social_connect_settings extends bpc_config{
 					'label' => __('Redirect Settings','vibe-customtypes'),
 					'name' =>'redirect_link',
 					'type' => 'select',
-					'options'=> apply_filters('bp_social_connect_redirect_settings',array(
-						'' => __('Same Page','vibe-customtypes'),
+					'options'=> array(
+						'refresh' => __('Same Page','vibe-customtypes'),
 						'home' => __('Home','vibe-customtypes'),
-						'profile' => __('BuddyPress Profile','vibe-customtypes'),
-						)),
+						),
 					'desc' => __('Set Login redirect settings','vibe-customtypes')
 				),
 				array(
@@ -65,41 +67,6 @@ class bp_social_connect_settings extends bpc_config{
 					'type' => 'text',
 					'std'=>wp_generate_password( 16, false ),
 					'desc' => __('Set a random security key value','vibe-customtypes')
-				),
-				array(
-					'label' => __('Social Button Styling','vibe-customtypes'),
-					'name' =>'button_css',
-					'type' => 'textarea',
-					'std'=> '
-					.bp_social_connect{
-						text-align: center;
-					}
-					.bp_social_connect a {
-					  background: #3b5998;
-					  color: #FFF;
-					  font-weight: 600;
-					  padding: 15px 20px;
-					  display: inline-block;
-					  text-decoration: none;
-					  min-width: 220px;
-					  margin: 5px 0;
-					  border-radius: 2px;
-					  letter-spacing: 1px;
-					  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-					}
-					.bp_social_connect a:hover{
-						box-shadow: none;	
-					}
-					.bp_social_connect a:focus{
-						box-shadow: inset 0 4px 0 rgba(0,0,0,0.1)
-					}					
-					#bp_social_connect_twitter{
-						background:#4099FF;
-					}					
-					#bp_social_connect_google{
-						background:#DD4B39;
-					}',
-					'desc' => __('Change default style of buttons','vibe-customtypes')
 				),
 			);
 
@@ -248,7 +215,8 @@ class bp_social_connect_settings extends bpc_config{
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
 					echo '<td class="forminp"><a class="add_new_map button">'.__('Add BuddyPress profile field map','bp-social-connect').'</a>';
 
-					$table = $wpdb->prefix.'bp_xprofile_fields';
+					global $bp,$wpdb;;
+					$table =  $bp->profile->table_name_fields;
 					$bp_fields = $wpdb->get_results("SELECT DISTINCT name FROM {$table}");
 
 					echo '<ul class="bp_fields">';

@@ -1,6 +1,6 @@
 <?php
 
-//require_once "facebook.php";
+ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class bp_social_connect_facebook extends bpc_config{
 
@@ -43,7 +43,12 @@ class bp_social_connect_facebook extends bpc_config{
 	function display_social_login(){
 		if(!$this->settings['facebook'])
 			return;
+		wp_enqueue_script('jquery');
+		
 		?>
+		<style>
+			a.bp_social_connect_facebook:before { content: ""!important; width: 16px; height: 16px; background: url(<?php echo plugins_url( '../../../assets/images/fb_logo.png',__FILE__ );?>); background-size: contain; opacity: 1 !important; }
+		</style>
 		<div id="fb-root" class="bp_social_connect_fb"></div>
 		<script type="text/javascript">
 		window.fbAsyncInit = function() {
@@ -88,54 +93,49 @@ class bp_social_connect_facebook extends bpc_config{
    	  	}
 		?>
 		jQuery(document).ready(function($){
+			$('.bp_social_connect_facebook').unbind('click');
 			$('.bp_social_connect_facebook').on('click',function(){
+					var $this = $(this);
+					$this.addClass('loading');
+					var security = $('#<?php echo $this->security_key; ?>').val();
+					FB.login(function(response){
+						if (response.authResponse){
 
-				var $this = $(this);
-				$this.addClass('loading');
-				var security = $('#<?php echo $this->security_key; ?>').val();
-				
-
-				FB.login(function(response){
-					if (response.authResponse){
-
-						FB.api('/me<?php echo $fb_keys;?>', function(response) {
-							console.log(response);
-							$.ajax({
-								url: ajaxurl,
-								data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
-								type: 'POST',
-								dataType: 'JSON',
-								success:function(data){
-									$this.removeClass('loading');
-									if (data.message){
-										form.parents('.bp_social_connect_facebook').before( data.message );
-									}
-									if (data.redirect_uri){
-										if (data.redirect_uri =='refresh') {
-											document.location.href=jQuery(location).attr('href');
-										} else {
-											document.location.href=data.redirect_uri;
+							FB.api('/me<?php echo $fb_keys;?>', function(response) {
+								$.ajax({
+									url: ajaxurl,
+									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
+									type: 'POST',
+									dataType: 'JSON',
+									success:function(data){
+										$this.removeClass('loading');
+										console.log(data);
+										if (data.redirect_uri){
+											if (data.redirect_uri =='refresh') {
+												window.location.href =jQuery(location).attr('href');
+											} else {
+												window.location.href = data.redirect_uri;
+											}
+										}else{
+											window.location.href = "<?php echo home_url();?>";
 										}
-									}else{
-										document.location.href=jQuery(location).attr('href');
+									},
+									error: function(xhr, ajaxOptions, thrownError) {
+										$this.removeClass('loading');
+										window.location.href = "<?php echo home_url();?>";
 									}
-								},
-								error: function(xhr, ajaxOptions, thrownError) {
-									$this.removeClass('loading');
-									window.location.href = "<?php echo home_url();?>";
-								}
+								});
+							
 							});
-						
-						});
-					}else{
+						}else{
 
-					}
-				}, {scope: 'email,user_likes', return_scopes: true});
+						}
+					}, {scope: 'email,user_likes', return_scopes: true});
 			});		
 		});
 		</script>
 		<?php
-		echo '<a class="bp_social_connect_facebook" href="javascript:void(0)">'.__('FACEBOOK','bp-social-connect').'</a><br />';	
+		echo '<a class="bp_social_connect_facebook" href="javascript:void(0)">'.__('FACEBOOK','bp-social-connect').'</a>';	
 	}
 
 
@@ -167,64 +167,88 @@ class bp_social_connect_facebook extends bpc_config{
 			));
 			if (isset($users[0]->ID) && is_numeric($users[0]->ID) ){ 
 				$user_id = $users[0]->ID;
-				$this->force_login($users[0]->user_email,false);
-				//Redirect JSON
-				$return=json_encode($return);
-				if(is_array($return)){ print_r($return); }else{ echo $return; }
-				die();
+				$wpuser = $this->force_login($users[0]->user_email,false);
+				if(is_wp_error($wpuser)){
+					$message = $wpuser->get_error_message();
+					$return = array('redirect_uri'=>wp_login_url(),'message'=>$message);
+					echo json_encode($return);
+					die();
+				}else{
+					//Redirect JSON
+					$redirect_url = $this->settings['redirect_link'];
+					echo $redirect_url;
+					$url = apply_filters('login_redirect',$redirect_url,home_url(),$wpuser);
+					$return=json_encode(array('redirect_uri'=>$url,'message'=>'success1'));
+					if(is_array($return)){ print_r($return); }else{ echo $return; }
+					die();
+				}
 			} 
+			
 		}
 
 
 		if(!is_numeric($user_id)){ 
 			//Check if facebook email is already being used by another user
 			if( email_exists( $email )) { // user is a member 
-				  $user = get_user_by('email',$email );
-				  $user_id = $user->ID;
-				  $this->force_login($user->user_email,false);
+				$user = $this->force_login($email ,false);
+				if(is_wp_error($user)){
+					$message = $user->get_error_message();
+					$return = array('redirect_uri'=>wp_login_url(),'message'=>$message);
+					echo json_encode($return);
+					die();
+				}else{
+			  	  $user_id = $user->ID;
 				  //Redirect JSON
-				  $return=json_encode($return);
-				  if(is_array($return)){ print_r($return); }else{ echo $return; } die;
-				  die();
+				  $redirect_url = $this->settings['redirect_link'];
+				  $url = apply_filters('login_redirect',$redirect_url,home_url(),$user);
+				  $return=json_encode(array('redirect_uri'=>$url,'message'=>'success2'));
+				  if(is_array($return)){ print_r($return); }else{ echo $return; }
+				}
+				die();
 		    }else{ // Register this new user 
-			    $random_password = wp_generate_password( 10, false );
-			   
-			    $user_id = wp_create_user( $email , $random_password, $email );
-			    if(empty($first_name)){
-			    	$first_name = $email;
-			    }
-			    wp_update_user(
-		    	array(
-		    		'ID'=>$user_id,
-		    		'user_url'=> $link,
-		    		'user_nicename'=>$first_name,
-		    		'display_name'=>$name,
-		    		)
-		    	);
-			    //Add facebook user ID to User meta field
-			    update_user_meta($user_id,$this->facebook_meta_key,$id);
-
-				if(isset($this->settings['facebook_map_fields']) && is_array($this->settings['facebook_map_fields'])){
-			   	    if(count($this->settings['facebook_map_fields']['field'])){
-			   	  	   foreach($this->settings['facebook_map_fields']['field'] as $fb_key => $fb_field){
-			   	  	 		xprofile_set_field_data($this->settings['facebook_map_fields']['bpfield'][$fb_key],$user_id,$$fb_field);
-			   	  	   }
-			   	    }
-			    }
-
 			    
-				// Grab Image and set as 
-			    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
-			    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
-			  	
-			  	$this->grab_avatar($thumb,'thumb',$user_id);
-			  	$this->grab_avatar($full,'full',$user_id);
-			  	//Redirect JSON
-			  	$this->force_login($email,false);
-			  	$return=json_encode($return);
-				if(is_array($return)){ print_r($return); }else{ echo $return; } die;
-			  	
-			  	die();
+			    $user_login = apply_filters( 'bp_social_connect_user_login_name', $email ,$_POST);
+			    $user_login .=rand(0,999);
+			    $user_id = register_new_user($user_login, $email);
+		    	if ( !is_wp_error($user_id) && is_numeric($user_id)) {
+					
+				    if(empty($first_name)){
+				    	$first_name = $email;
+				    }
+				    wp_update_user(
+			    	array(
+			    		'ID'=>$user_id,
+			    		'user_url'=> $link,
+			    		'display_name'=>$name,
+			    		)
+			    	);
+				    //Add facebook user ID to User meta field
+				    update_user_meta($user_id,$this->facebook_meta_key,$id);
+
+					if(isset($this->settings['facebook_map_fields']) && is_array($this->settings['facebook_map_fields'])){
+				   	    if(count($this->settings['facebook_map_fields']['field'])){
+				   	  	   foreach($this->settings['facebook_map_fields']['field'] as $fb_key => $fb_field){
+				   	  	 		xprofile_set_field_data($this->settings['facebook_map_fields']['bpfield'][$fb_key],$user_id,$$fb_field);
+				   	  	   }
+				   	    }
+				    }
+
+				    
+					// Grab Image and set as 
+				    $thumb = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_THUMB_WIDTH.'&height='.BP_AVATAR_THUMB_HEIGHT;
+				    $full = 'http://graph.facebook.com/'.$id.'/picture?width='.BP_AVATAR_FULL_WIDTH.'&height='.BP_AVATAR_FULL_HEIGHT;
+				  	
+				  	$this->grab_avatar($thumb,'thumb',$user_id);
+				  	$this->grab_avatar($full,'full',$user_id);
+				  	//Redirect JSON
+				  	$this->force_login($email,false);
+				  	$return=json_encode($return);
+					if(is_array($return)){ print_r($return); }else{ echo $return; } die;
+				  	
+				  	die();
+				}else{
+					_e('User not created','vibe');
+				}
 		    }
 		}
 	}

@@ -1,5 +1,8 @@
 <?php
 
+
+ if ( ! defined( 'ABSPATH' ) ) exit;
+
 class init_bp_social_connect extends bpc_config{
 
 	var $settings;
@@ -7,7 +10,7 @@ class init_bp_social_connect extends bpc_config{
 	public function __construct(){
 		$this->settings = $this->get();
 		new bp_social_connect_facebook;
-		new bp_social_connect_twitter;
+		//new bp_social_connect_twitter;
 		new bp_social_connect_google;
 		add_action('wp_head',array($this,'ajaxurl'));
 		add_action('login_footer',array($this,'ajaxurl'));
@@ -15,21 +18,27 @@ class init_bp_social_connect extends bpc_config{
 		add_action('login_footer',array($this,'display_social_login'));
 		add_action('bp_before_account_details_fields',array($this,'display_register_social_login'));
 		add_action('bp_after_sidebar_login_form',array($this,'display_social_login'));
+		add_Action('bp_social_connect',array($this,'styling'));
 	}	
 
 	function display_social_login(){
 		echo '<div class="bp_social_connect">';
 		do_action('bp_social_connect');
-		echo '</div><style>#bp_social_connect_facebook:before{content:"\f305";float:left;font-size:16px;font-family:dashicons}#bp_social_connect_twitter:before{content:"\f301";float:left;font-size:16px;font-family:dashicons}#bp_social_connect_google:before{content:"\f462";float:left;font-size:16px;font-family:dashicons}</style>';
+		echo '</div>';
 	}
 
 	function display_register_social_login(){
 		echo '<div class="bp_social_connect">';
 		do_action('bp_social_connect');
-		echo '</div><style>#bp_social_connect_facebook:before{content:"\f305";float:left;font-size:16px;font-family:dashicons}#bp_social_connect_twitter:before{content:"\f301";float:left;font-size:16px;font-family:dashicons}#bp_social_connect_google:before{content:"\f462";float:left;font-size:16px;font-family:dashicons}#signup_form .bp_social_connect{display: inline-block;width: 100%;line-height: 0;}#signup_form .bp_social_connect a{float: left;line-height: 1.2;margin-right: 5px;}</style>';
+		echo '</div>';
 	}
 
-	function verify_email(){
+	function styling(){
+		echo '<style>.bp_social_connect { display: inline-block; width: 100%; }
+			.bp_social_connect_facebook{background:#3b5998;}.bp_social_connect_google{background:#DD4B39 !important;}.bp_social_connect > a{text-align:center;float:left;padding:15px;border-radius:2px;color:#fff !important;width:200px;margin:0 5px;}.bp_social_connect > a:first-child{margin-left:0;}
+			.bp_social_connect > a:before{float:left;font-size:16px;font-family:fontawesome;opacity:0.6;}.bp_social_connect_facebook:before{content:"\f09a";}.bp_social_connect_google:before{content:"\f0d5";}</style>';
+	}
+	function verify_email(){	
 		if (!is_user_logged_in()) return;
 		global $current_user;
 		get_currentuserinfo();
