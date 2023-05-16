@@ -122,7 +122,7 @@ class bp_social_connect_facebook extends bpc_config{
 									dataType: 'JSON',
 									success:function(data){
 										$this.removeClass('loading');
-										console.log(data);
+										
 										if (data.redirect_uri){
 											if (data.redirect_uri =='refresh') {
 												window.location.href =jQuery(location).attr('href');
@@ -156,12 +156,12 @@ class bp_social_connect_facebook extends bpc_config{
 
 		$this->get_settings();
 		if ( !isset($_POST['security']) || !wp_verify_nonce($_POST['security'],$this->settings['security']) ){
-		    _e('Security check Failed. Contact Administrator.','vibe'); 
+		    _e('Security check Failed. Contact Administrator.','bp-social-connect'); 
 		    die();
 		}
 
 		if (!isset($_POST) || ($_POST['action'] != 'bp_social_connect_facebook_login') || !isset($_POST['id'])){
-			_e('Invalid Post values','vibe'); 
+			_e('Invalid Post values','bp-social-connect'); 
 			die();
 		} 
 
@@ -170,16 +170,16 @@ class bp_social_connect_facebook extends bpc_config{
 			$body = wp_remote_retrieve_body($reverify);
 			$body = json_decode($body,true);
 			if(!empty($body['error'])){
-				_e('Invalid access token','vibe'); 
+				_e('Invalid access token','bp-social-connect'); 
 				die();
 			}
 			if(empty($body['id']) || $body['id'] != $this->settings['facebook_app_id']){
-				_e('Invalid access token','vibe'); 
+				_e('Invalid access token','bp-social-connect'); 
 				die();
 			}
 			
 		}else{
-			_e('Invalid access token','vibe'); 
+			_e('Invalid access token','bp-social-connect'); 
 			die();
 		}
 
@@ -279,7 +279,7 @@ class bp_social_connect_facebook extends bpc_config{
 				  	
 				  	die();
 				}else{
-					_e('User not created','vibe');
+					_e('User not created','bp-social-connect');
 				}
 		    }
 		}
