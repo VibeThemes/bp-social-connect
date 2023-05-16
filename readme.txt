@@ -2,8 +2,8 @@
 Contributors: vibethemes
 Tags: social login, buddypress, social networking, profiles, social, community, networks
 Requires at least: 3.6
-Tested up to: 4.7.4
-Stable tag: 1.6
+Tested up to: 6.2
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,7 +11,7 @@ BP Social Connect is a social login integration plugin for BuddyPress.
 
 == Description ==
 
-Connect your BuddyPress site with popular social networks. This plugin will allow you to connect your WordPress or BuddyPress
+Connect your BuddyPress site with popular social networks. This plugin will allow you to connect your WordPress or BuddyPress.
 
 1. Create new users or connect your existing users with their social profiles.
 2. Grab social network data to fill WordPress user data.
@@ -19,6 +19,7 @@ Connect your BuddyPress site with popular social networks. This plugin will allo
 4. Connect custom BuddyPress profile field data with social network fields.
 5. Customize button CSS
 
+Checkout our <a href="https://vibethemes.com">wordpress community plugin</a>
 
 = Supported Social Networking sites =
 
