@@ -1,11 +1,12 @@
 <?php
 /*
 Plugin Name: BuddyPress Social Connect
-Plugin URI: http://www.vibethemes.com
+Plugin URI: https://vibethemes.com
 Description: Connect BuddyPress Login and Registration with Social Networks
-Version: 1.6
+Version: 1.6.1
 Author: VibeThemes
-Author URI: http://www.VibeThemes.com/
+Text Domain: bp-social-connect
+Author URI: https://VibeThemes.com/
 License : GPLv2 or Later
 */
 
