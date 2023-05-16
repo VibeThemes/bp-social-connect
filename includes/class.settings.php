@@ -12,7 +12,11 @@ class bp_social_connect_settings extends bpc_config{
 		add_action('admin_enqueue_scripts',array($this,'enqueue_admin_scripts'));
 		$this->settings=$this->get(); 
 	}
-
+	function get_settings(){
+		if(empty($this->settings)){
+			$this->settings = $this->get();
+		}
+	}
 	function enqueue_admin_scripts($hook){
 		if ( 'settings_page_bp-social-connect' != $hook ) {
         	return;
@@ -213,40 +217,47 @@ class bp_social_connect_settings extends bpc_config{
 				break;
 				case 'bp_fields':
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
-					echo '<td class="forminp"><a class="add_new_map button">'.__('Add BuddyPress profile field map','bp-social-connect').'</a>';
+					echo '<td class="forminp">';
+					if(function_exists('bp_is_active') && bp_is_active('xprofile')){
+						$this->get_settings();
+						echo '<a class="add_new_map button">'.__('Add BuddyPress profile field map','bp-social-connect').'</a>';
+						
+						global $bp,$wpdb;;
+						$table =  $bp->profile->table_name_fields;
+						$bp_fields = $wpdb->get_results("SELECT DISTINCT name FROM {$table}");
 
-					global $bp,$wpdb;;
-					$table =  $bp->profile->table_name_fields;
-					$bp_fields = $wpdb->get_results("SELECT DISTINCT name FROM {$table}");
-
-					echo '<ul class="bp_fields">';
-					if(is_array($this->settings[$setting['name']]['field']) && count($this->settings[$setting['name']]['field'])){
-						foreach($this->settings[$setting['name']]['field'] as $key => $field){
-							echo '<li><label><select name="'.$setting['name'].'[field][]">';
-							foreach($setting['fields'] as $k=>$v){
-								echo '<option value="'.$k.'" '.(($field == $k)?'selected=selected':'').'>'.$k.'</option>';
+						echo '<ul class="bp_fields">';
+						if(!empty($this->settings[$setting['name']]) && is_array($this->settings[$setting['name']]['field']) && count($this->settings[$setting['name']]['field'])){
+							foreach($this->settings[$setting['name']]['field'] as $key => $field){
+								echo '<li><label><select name="'.$setting['name'].'[field][]">';
+								foreach($setting['fields'] as $k=>$v){
+									echo '<option value="'.$k.'" '.(($field == $k)?'selected=selected':'').'>'.$k.'</option>';
+								}
+								echo '</select></label><select name="'.$setting['name'].'[bpfield][]">';
+								foreach($bp_fields as $f){
+									echo '<option value="'.$f->name.'" '.(($this->settings[$setting['name']]['bpfield'][$key] == $f->name)?'selected=selected':'').'>'.$f->name.'</option>';
+								}
+								echo '</select><span class="dashicons dashicons-no remove_field_map"></span></li>';
 							}
-							echo '</select></label><select name="'.$setting['name'].'[bpfield][]">';
-							foreach($bp_fields as $f){
-								echo '<option value="'.$f->name.'" '.(($this->settings[$setting['name']]['bpfield'][$key] == $f->name)?'selected=selected':'').'>'.$f->name.'</option>';
-							}
-							echo '</select><span class="dashicons dashicons-no remove_field_map"></span></li>';
 						}
+						echo '<li class="hide">';
+						echo '<label><select rel-name="'.$setting['name'].'[field][]">';
+						foreach($setting['fields'] as $k=>$v){
+							echo '<option value="'.$k.'">'.$k.'</option>';
+						}
+						echo '</select></label>';
+						echo '<select rel-name="'.$setting['name'].'[bpfield][]">';
+						
+						foreach($bp_fields as $f){
+							echo '<option value="'.$f->name.'">'.$f->name.'</option>';
+						}
+						echo '</select>';
+						echo '<span class="dashicons dashicons-no remove_field_map"></span></li>';
+						echo '</ul></td>';
+					}else{
+						echo '<div class="notice inline notice-warning notice-alt"><p>'.
+						_x('BuddyPress & xProfile fields not active. Fields & profile image can not be mapped','missing buddypress message','bp-social-connect').'</p></div>';
 					}
-					echo '<li class="hide">';
-					echo '<label><select rel-name="'.$setting['name'].'[field][]">';
-					foreach($setting['fields'] as $k=>$v){
-						echo '<option value="'.$k.'">'.$k.'</option>';
-					}
-					echo '</select></label>';
-					echo '<select rel-name="'.$setting['name'].'[bpfield][]">';
-					
-					foreach($bp_fields as $f){
-						echo '<option value="'.$f->name.'">'.$f->name.'</option>';
-					}
-					echo '</select>';
-					echo '<span class="dashicons dashicons-no remove_field_map"></span></li>';
-					echo '</ul></td>';
 				break;
 				default:
 					echo '<th scope="row" class="titledesc">'.$setting['label'].'</th>';
@@ -264,7 +275,7 @@ class bp_social_connect_settings extends bpc_config{
 
 
 	function save(){
-		$none = $_POST['save_settings'];
+		
 		if ( !isset($_POST['save']) || !isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'],'save_settings') ){
 		    _e('Security check Failed. Contact Administrator.','bp-social-connect');
 		    die();

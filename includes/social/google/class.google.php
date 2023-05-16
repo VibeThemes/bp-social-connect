@@ -21,14 +21,21 @@ class bp_social_connect_google extends bpc_config{
 	var $googleoauth2;
 
 	function __construct(){
-		$this->settings = $this->get();
+		
 		add_action('bp_social_connect',array($this,'display_social_login'));
 		add_action('template_redirect', array($this, 'google_authorize'),1 );
 		add_filter('bp_social_connect_google_fields',array($this,'map_fields'));
 	}
 
+	function get_settings(){
+		if(empty($this->settings)){
+			$this->settings = $this->get();
+		}
+	}
+
 	function verify(){
-		if ( $this->settings['google'] && isset($this->settings['google_client_id']) && isset($this->settings['google_client_secret']) && isset($this->settings['google_redirect_uri']) ) {
+		$this->get_settings();
+		if ( !empty($this->settings['google']) && isset($this->settings['google_client_id']) && isset($this->settings['google_client_secret']) && isset($this->settings['google_redirect_uri']) ) {
 			return true;
 			if(!session_id())
 				session_start();
@@ -55,33 +62,33 @@ class bp_social_connect_google extends bpc_config{
 	}
 
 	function load_google(){
-			if(!$this->verify())
-				return;
-
-			if( !class_exists( 'apiClient' ) ) { // loads the Google class
-				require_once ( 'src/apiClient.php' ); 
-			}
-			if( !class_exists( 'apiPlusService' ) ) { // Loads the google plus service class for user data
-				require_once ( 'src/contrib/apiPlusService.php' ); 
-			}
-			if( !class_exists( 'apiOauth2Service' ) ) { // loads the google plus service class for user email
-				require_once ( 'src/contrib/apiOauth2Service.php' ); 
-			}
-			
-			// Google Objects
-			$this->google = new apiClient();
-			$this->google->setApplicationName( "Google+ PHP Starter Application" );
-			$this->google->setClientId( $this->settings['google_client_id'] );
-			$this->google->setClientSecret( $this->settings['google_client_secret'] );
-			$this->google->setRedirectUri( $this->settings['google_redirect_uri'] );
-			$this->google->setScopes( array( 'https://www.googleapis.com/auth/plus.me','https://www.googleapis.com/auth/userinfo.email' ) );
-			
-			$this->googleplus = new apiPlusService( $this->google ); // For getting user detail from google
-			$this->googleoauth2 = new apiOauth2Service( $this->google ); // For gettting user email from google
-			
-			if (isset($_SESSION['google_token'])) {
-				$this->google->setAccessToken($_SESSION['google_token']);
-			}
+		if(!$this->verify())
+			return;
+		$this->get_settings();
+		if( !class_exists( 'apiClient' ) ) { // loads the Google class
+			require_once ( 'src/apiClient.php' ); 
+		}
+		if( !class_exists( 'apiPlusService' ) ) { // Loads the google plus service class for user data
+			require_once ( 'src/contrib/apiPlusService.php' ); 
+		}
+		if( !class_exists( 'apiOauth2Service' ) ) { // loads the google plus service class for user email
+			require_once ( 'src/contrib/apiOauth2Service.php' ); 
+		}
+		
+		// Google Objects
+		$this->google = new apiClient();
+		$this->google->setApplicationName( "Google+ PHP Starter Application" );
+		$this->google->setClientId( $this->settings['google_client_id'] );
+		$this->google->setClientSecret( $this->settings['google_client_secret'] );
+		$this->google->setRedirectUri( $this->settings['google_redirect_uri'] );
+		$this->google->setScopes( array( 'https://www.googleapis.com/auth/plus.me','https://www.googleapis.com/auth/userinfo.email' ) );
+		
+		$this->googleplus = new apiPlusService( $this->google ); // For getting user detail from google
+		$this->googleoauth2 = new apiOauth2Service( $this->google ); // For gettting user email from google
+		
+		if (isset($_SESSION['google_token'])) {
+			$this->google->setAccessToken($_SESSION['google_token']);
+		}
 		
 	}
 

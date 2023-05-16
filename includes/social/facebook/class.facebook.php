@@ -20,13 +20,23 @@ class bp_social_connect_facebook extends bpc_config{
 
 	var $facebook_meta_key = 'facebook_id';
 	function __construct(){
-		$this->settings = $this->get();
+		
+		add_action( 'login_enqueue_scripts',array($this,'login_enqueue'));
 		add_action('bp_social_connect',array($this,'display_social_login'));
 		add_action('wp_ajax_nopriv_bp_social_connect_facebook_login',array($this,'bp_social_connect_facebook_login'));
 		add_action('wp_ajax_bp_social_connect_facebook_login',array($this,'bp_social_connect_facebook_login'));
 		add_filter('bp_social_connect_facebook_fields',array($this,'map_fields'));
 	}
 
+	function login_enqueue(){
+		wp_enqueue_script('jquery');
+	}
+
+	function get_settings(){
+		if(empty($this->settings)){
+			$this->settings = $this->get();
+		}
+	}
 
 	function map_fields($settings){
 		$settings[]= array(
@@ -41,10 +51,13 @@ class bp_social_connect_facebook extends bpc_config{
 	}
 
 	function display_social_login(){
-		if(!$this->settings['facebook'])
+		$this->get_settings();
+
+		if(empty($this->settings['facebook']))
 			return;
-		wp_enqueue_script('jquery');
 		
+
+		$fb_keys='';
 		?>
 		<style>
 			a.bp_social_connect_facebook:before { content: ""!important; width: 16px; height: 16px; background: url(<?php echo plugins_url( '../../../assets/images/fb_logo.png',__FILE__ );?>); background-size: contain; opacity: 1 !important; }
@@ -98,13 +111,13 @@ class bp_social_connect_facebook extends bpc_config{
 					var $this = $(this);
 					$this.addClass('loading');
 					var security = $('#<?php echo $this->security_key; ?>').val();
-					FB.login(function(response){
-						if (response.authResponse){
+					FB.login(function(rese){
+						if (res.authResponse){
 
 							FB.api('/me<?php echo $fb_keys;?>', function(response) {
 								$.ajax({
 									url: ajaxurl,
-									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&security='+security,
+									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&accessToken='+res.authResponse.accessToken+'&security='+security,
 									type: 'POST',
 									dataType: 'JSON',
 									success:function(data){
@@ -141,7 +154,7 @@ class bp_social_connect_facebook extends bpc_config{
 
 	function bp_social_connect_facebook_login(){
 
-
+		$this->get_settings();
 		if ( !isset($_POST['security']) || !wp_verify_nonce($_POST['security'],$this->settings['security']) ){
 		    _e('Security check Failed. Contact Administrator.','vibe'); 
 		    die();
@@ -152,6 +165,25 @@ class bp_social_connect_facebook extends bpc_config{
 			die();
 		} 
 
+		if(!empty($_POST['accessToken'])){
+			$reverify = wp_remote_get(esc_url_raw('https://graph.facebook.com/app/?access_token='.$_POST['accessToken']));
+			$body = wp_remote_retrieve_body($reverify);
+			$body = json_decode($body,true);
+			if(!empty($body['error'])){
+				_e('Invalid access token','vibe'); 
+				die();
+			}
+			if(empty($body['id']) || $body['id'] != $this->settings['facebook_app_id']){
+				_e('Invalid access token','vibe'); 
+				die();
+			}
+			
+		}else{
+			_e('Invalid access token','vibe'); 
+			die();
+		}
+
+		//Verify if call is from Facebook !
 		extract($_POST);
 		
 		$user_id = '';
