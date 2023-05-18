@@ -3,7 +3,7 @@
 Plugin Name: BuddyPress Social Connect
 Plugin URI: https://vibethemes.com
 Description: Connect BuddyPress Login and Registration with Social Networks
-Version: 1.6.1
+Version: 1.6.2
 Author: VibeThemes
 Text Domain: bp-social-connect
 Author URI: https://VibeThemes.com/

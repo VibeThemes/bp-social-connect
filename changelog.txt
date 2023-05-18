@@ -1,4 +1,6 @@
-*1.7
+*1.6.2
+*Security vulnerability patch
+*1.6.1
 *Security vulnerability fix
 *1.6
 *fb logo
