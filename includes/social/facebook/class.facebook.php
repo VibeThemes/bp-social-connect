@@ -111,13 +111,13 @@ class bp_social_connect_facebook extends bpc_config{
 					var $this = $(this);
 					$this.addClass('loading');
 					var security = $('#<?php echo $this->security_key; ?>').val();
-					FB.login(function(rese){
-						if (res.authResponse){
+					FB.login(function(res){
+						if (res && res.authResponse){
 
 							FB.api('/me<?php echo $fb_keys;?>', function(response) {
 								$.ajax({
 									url: ajaxurl,
-									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&accessToken='+res.authResponse.accessToken+'&security='+security,
+									data: 'action=bp_social_connect_facebook_login&id='+response.id+'&email='+response.email+'&first_name='+response.first_name+'&last_name='+response.last_name+'&gender='+response.gender+'&name='+response.name+'&link='+response.link+'&locale='+response.locale+'&accessToken='+res.authResponse.accessToken+'&fbuid='+res.authResponse.id+'&security='+security,
 									type: 'POST',
 									dataType: 'JSON',
 									success:function(data){
@@ -166,10 +166,12 @@ class bp_social_connect_facebook extends bpc_config{
 		} 
 
 		if(!empty($_POST['accessToken'])){
-			$reverify = wp_remote_get(esc_url_raw('https://graph.facebook.com/app/?access_token='.$_POST['accessToken']));
+
+			https://graph.facebook.com/USER_ID/access_token=xxxxxxxxxxxxxxxxx
+			$reverify = wp_remote_get(esc_url_raw('https://graph.facebook.com/'.$_POST['id'].'?fields=email&access_token='.$_POST['accessToken']));
 			$body = wp_remote_retrieve_body($reverify);
 			$body = json_decode($body,true);
-			if(!empty($body['error'])){
+			if(!empty($body['error']) || empty($body['email']) || $body['email'] != $_POST['email']){
 				_e('Invalid access token','bp-social-connect'); 
 				die();
 			}
