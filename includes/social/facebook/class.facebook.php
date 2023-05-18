@@ -171,7 +171,7 @@ class bp_social_connect_facebook extends bpc_config{
 			$reverify = wp_remote_get(esc_url_raw('https://graph.facebook.com/'.$_POST['id'].'?fields=email&access_token='.$_POST['accessToken']));
 			$body = wp_remote_retrieve_body($reverify);
 			$body = json_decode($body,true);
-			if(!empty($body['error']) || empty($body['email']) || $body['email'] != $_POST['email']){
+			if(!empty($body['error']) || empty($body['email']) || !is_email($_POST['email']) || sanitize_email($body['email']) != sanitize_email($_POST['email'])){
 				_e('Invalid access token','bp-social-connect'); 
 				die();
 			}
