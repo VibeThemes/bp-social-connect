@@ -167,7 +167,6 @@ class bp_social_connect_facebook extends bpc_config{
 
 		if(!empty($_POST['accessToken'])){
 
-			https://graph.facebook.com/USER_ID/access_token=xxxxxxxxxxxxxxxxx
 			$reverify = wp_remote_get(esc_url_raw('https://graph.facebook.com/'.$_POST['id'].'?fields=email&access_token='.$_POST['accessToken']));
 			$body = wp_remote_retrieve_body($reverify);
 			$body = json_decode($body,true);
